@@ -1,0 +1,128 @@
+@startuml
+' Reference: https://visual-paradigm.com/guide/uml-unified-modeling-language/uml-aggregation-vs-composition/
+skinparam  {
+	ArrowColor Grey
+	ActorBorderColor DimGray
+	LifeLineBorderColor Grey
+	LifeLineBackgroundColor #EEEBDC
+
+	ParticipantBorderColor Grey
+	ParticipantBackgroundColor #EEEBDC
+	ParticipantFontColor DimGray
+
+	ActorBackgroundColor #EEEBDC
+	ActorFontColor DimGray
+}
+skinparam class {
+	BackgroundColor #EEEBDC
+	BorderColor DimGray
+	' BorderThickness
+	FontColor DimGray
+	' FontName
+	' FontSize
+	' FontStyle
+	' Shadowing
+	' TextAlignment
+}
+
+skinparam note {
+	BackgroundColor #EEEBDC
+	BorderColor DimGray
+	' BorderThickness
+	FontColor DimGray
+	' FontName
+	' FontSize
+	' FontStyle
+	' Shadowing
+	' TextAlignment
+}
+
+Interface Suffix {
+    _prefixLength;
+    ByteList prefix
+    ByteList suffix
+}
+
+abstract class Signable {
+    Verifiable verifyKey
+    sign(message)
+}
+
+
+abstract class Verifiable {
+    verify(sign, msg)
+    verifySignedMessage(signedMessage)
+}
+
+abstract class Encodable {
+    Encoder encoder;
+    encode();
+}
+
+abstract class Derivable {
+    int depth
+    ExtendedKey derive(int index);
+}
+
+
+
+note top of ByteList
+    |= Name |
+    |<#FF8080> privateKey  |
+    |<#80FF80> publicKey |
+    |<#8080FF> chaincode |
+    |<#yellow> bytes |
+end note
+
+class ByteList extends Uint8List implements Encodable, Suffix {
+
+}
+
+abstract class AsymmetricKey implements ByteList {
+    <#yellow>|   32   |
+}
+
+abstract class AsymmetricPrivateKey implements AsymmetricKey {
+    publicKey
+    generate()
+}
+
+abstract class AsymmetricPublicKey implements AsymmetricKey {
+}
+
+class ChainCode {
+    |<#8080FF> 32 |
+}
+
+abstract class ExtendedKey implements AsymmetricKey, Derivable {
+    ChainCode chainCode
+    AsymmetricKey key
+    |<#FF8080> 32 |<#8080FF> 32 |
+}
+
+ChainCode *-- ExtendedKey
+
+abstract class ExtendedPrivateKey extends AsymmetricPrivateKey implements ExtendedKey {
+    |<#FF8080> 64 |<#8080FF> 32 |
+}
+
+abstract class ExtendedPublicKey extends AsymmetricPublicKey implements ExtendedKey {
+    |<#80FF80> 32 |<#8080FF> 32 |
+}
+
+class CardanoExtendedPrivateKey extends AsymmetricPrivateKey implements Signable {
+    |<#FF8080> 64 |
+}
+
+class CardanoExtendedPublicKey extends AsymmetricPublicKey implements Verifiable {
+    |<#80FF80> 32 |
+}
+
+class CardanoBip32PrivateKey extends CardanoExtendedPrivateKey implements ExtendedPrivateKey {
+    |<#FF8080> 64 |<#8080FF> 32 |
+}
+
+class CardanoBip32PublicKey extends CardanoExtendedPublicKey implements ExtendedPublicKey {
+    |<#80FF80> 32 |<#8080FF> 32 |
+}
+@enduml
