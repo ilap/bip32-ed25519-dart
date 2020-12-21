@@ -1,43 +1,43 @@
 @startuml
 ' Reference: https://visual-paradigm.com/guide/uml-unified-modeling-language/uml-aggregation-vs-composition/
 skinparam  {
-	ArrowColor Grey
-	ActorBorderColor DimGray
-	LifeLineBorderColor Grey
-	LifeLineBackgroundColor #EEEBDC
+    ArrowColor Grey
+    ActorBorderColor DimGray
+    LifeLineBorderColor Grey
+    LifeLineBackgroundColor #EEEBDC
 
-	ParticipantBorderColor Grey
-	ParticipantBackgroundColor #EEEBDC
-	ParticipantFontColor DimGray
+    ParticipantBorderColor Grey
+    ParticipantBackgroundColor #EEEBDC
+    ParticipantFontColor DimGray
 
-	ActorBackgroundColor #EEEBDC
-	ActorFontColor DimGray
+    ActorBackgroundColor #EEEBDC
+    ActorFontColor DimGray
 }
 skinparam class {
-	BackgroundColor #EEEBDC
-	BorderColor DimGray
-	' BorderThickness
-	FontColor DimGray
-	' FontName
-	' FontSize
-	' FontStyle
-	' Shadowing
-	' TextAlignment
+    BackgroundColor #EEEBDC
+    BorderColor DimGray
+    ' BorderThickness
+    FontColor DimGray
+    ' FontName
+    ' FontSize
+    ' FontStyle
+    ' Shadowing
+    ' TextAlignment
 }
 
 skinparam note {
-	BackgroundColor #EEEBDC
-	BorderColor DimGray
-	' BorderThickness
-	FontColor DimGray
-	' FontName
-	' FontSize
-	' FontStyle
-	' Shadowing
-	' TextAlignment
+    BackgroundColor #FFEBDC
+    BorderColor DimGray
+    ' BorderThickness
+    FontColor DimGray
+    ' FontName
+    ' FontSize
+    ' FontStyle
+    ' Shadowing
+    ' TextAlignment
 }
 
-Interface Suffix {
+abstract class Suffix {
     _prefixLength;
     ByteList prefix
     ByteList suffix
@@ -64,8 +64,6 @@ abstract class Derivable {
     ExtendedKey derive(int index);
 }
 
-
-
 note top of ByteList
     |= Name |
     |<#FF8080> privateKey  |
@@ -74,9 +72,7 @@ note top of ByteList
     |<#yellow> bytes |
 end note
 
-class ByteList extends Uint8List implements Encodable, Suffix {
-
-}
+class ByteList extends Uint8List implements Encodable, Suffix {}
 
 abstract class AsymmetricKey implements ByteList {
     <#yellow>|   32   |
@@ -90,13 +86,15 @@ abstract class AsymmetricPrivateKey implements AsymmetricKey {
 abstract class AsymmetricPublicKey implements AsymmetricKey {
 }
 
-class ChainCode {
+
+class ChainCode implements ByteList {
     |<#8080FF> 32 |
 }
 
 abstract class ExtendedKey implements AsymmetricKey, Derivable {
     ChainCode chainCode
     AsymmetricKey key
+    ExtendedPublicKey extendedPublic
     |<#FF8080> 32 |<#8080FF> 32 |
 }
 
@@ -114,7 +112,7 @@ class CardanoExtendedPrivateKey extends AsymmetricPrivateKey implements Signable
     |<#FF8080> 64 |
 }
 
-class CardanoExtendedPublicKey extends AsymmetricPublicKey implements Verifiable {
+class CardanoPublicKey extends AsymmetricPublicKey implements Verifiable {
     |<#80FF80> 32 |
 }
 
@@ -122,7 +120,7 @@ class CardanoBip32PrivateKey extends CardanoExtendedPrivateKey implements Extend
     |<#FF8080> 64 |<#8080FF> 32 |
 }
 
-class CardanoBip32PublicKey extends CardanoExtendedPublicKey implements ExtendedPublicKey {
+class CardanoBip32PublicKey extends CardanoPublicKey implements ExtendedPublicKey {
     |<#80FF80> 32 |<#8080FF> 32 |
 }
 @enduml
