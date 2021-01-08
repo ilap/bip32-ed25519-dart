@@ -26,7 +26,7 @@ skinparam class {
 }
 
 skinparam note {
-    BackgroundColor #FFEBDC
+    BackgroundColor #EEEBDC
     BorderColor DimGray
     ' BorderThickness
     FontColor DimGray
@@ -37,7 +37,7 @@ skinparam note {
     ' TextAlignment
 }
 
-abstract class Suffix {
+interface Suffix {
     _prefixLength;
     ByteList prefix
     ByteList suffix
@@ -63,16 +63,17 @@ abstract class Derivable {
     int depth
     ExtendedKey derive(int index);
 }
-
 note top of ByteList
-    |= Name |
-    |<#FF8080> privateKey  |
-    |<#80FF80> publicKey |
-    |<#8080FF> chaincode |
-    |<#yellow> bytes |
+|= Name |
+|<#FF8080> privateKey  |
+|<#80FF80> publicKey |
+|<#8080FF> chaincode |
+|<#yellow> bytes |
 end note
 
-class ByteList extends Uint8List implements Encodable, Suffix {}
+class ByteList extends Uint8List implements Encodable, Suffix {
+
+}
 
 abstract class AsymmetricKey implements ByteList {
     <#yellow>|   32   |

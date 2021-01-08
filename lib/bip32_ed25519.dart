@@ -3,15 +3,14 @@ import 'package:pinenacl/api.dart';
 
 mixin ExtendedKey on Suffix {
   ExtendedKey get public;
-  ByteList get chainCode => suffix;
   ByteList get key => prefix;
-
-  ExtendedKey derive(int index);
 }
 
-mixin Bip32 {
+mixin Bip32 on Suffix {
+  ByteList get chainCode => suffix;
   ExtendedKey get master;
   ExtendedKey fromPath(String path);
+  ExtendedKey derive(int index);
 }
 
 mixin ExtendedPrivateKey implements ExtendedKey {}
@@ -151,7 +150,7 @@ void main() {
 
   print('AAAAAA: ' + esk.public.encode(HexCoder.instance));
   print('BBBBBB: ' + epk.encode(HexCoder.instance));
-  print('CCCCCC: ' + esk.public.chainCode.encode(HexCoder.instance));
+  //print('CCCCCC: ' + esk.public.chainCode.encode(HexCoder.instance));
   print('DDDDDD: ' + epk.chainCode.encode(HexCoder.instance));
 
   var message = 'Hello world!'.codeUnits;
