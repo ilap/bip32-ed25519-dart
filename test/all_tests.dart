@@ -1,5 +1,4 @@
-import 'key_types_test.dart' as key_types_test;
-
+import 'keys_test.dart' as keys_test;
 void main() {
-  key_types_test.main();
+  keys_test.main();
 }

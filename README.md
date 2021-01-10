@@ -1,21 +1,23 @@
 # bip32-ed25519-dart
-The Dart implementation of the BIP32-Ed25519 the deterministic key generation solution for the Ed25519 curve
-
-
+The Dart implementation of the BIP32-Ed25519 the deterministic key generation scheme for Edward25519 curve
 # API Interfaces
 
 TBD
 
 # Key Types
 - ED25519 (RFC 8032) Keys 
-    - the private key is a 32-bytre long cryptographically secure random data.
+    - the generated ed25519 signing key is 64-byte long and is created by the concatenation of the ED25519 seed (private key) and the generated public key.
+    - the private key a.k.a seed is a 32-byte long cryptographically secure random data.
 - ED25519 Extended Keys
-    - the private key is a 64-byte long data, and it can be interpreted as the SHA512 hashed and clear/set bit of an ED25519 private key.
-    - they also can be interpreted as standalone keys, though brute-force is required for retrieving the ED25519 private key from an extended key.
+    - the private key is a 64-byte long cryptographically secure random data, and it can be interpreted as the SHA512 hashed and clear/set bit of an ED25519 seed or the first 32-byte (the seed part) of the ED25519 secret/private key. 
+    - they also can be interpreted as standalone keys, though brute-force is required for retrieving the ED25519 seed from an extended key.
+    - The clears are set based on the RFC8032 specification.
+    - an Extended key's left 32-byte is equivalent /w a `X25519` (for `EcDH`) private key.
 - BIP32-ED25519 Keys
     - BIP32-ED25519 derivation requires that the 3rd bit of the 31th bytes of an ED25519 Extended key must be cleared.
-    - This causes half of the ED25519 and ED25519 Extended keys are not backward compatible /w BIP32-ED25519 keys.
-
+    - This means that every `BIP32-ED2559` signing key is valid `Extended ED25519 key`,
+    - but half of the ED25519 Extended and therefore half of the ED25519 keys are not compatible /w BIP32-ED25519 keys.
+    
 
 | Key ID          | Constructors                                            | Comment                                                                               | Constraints                                                                    |
 |-----------------|---------------------------------------------------------|---------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
@@ -76,10 +78,9 @@ The [message signing and signature verifying is compatible /w ED25519](https://r
 
 ### BIP32-ED25519 Keys
 
-The 96-byte long BIP32-ED25519 keys contains the ed25519e_sk and the chain code.
+The 96-byte long BIP32-ED25519 keys contains a ed25519e_sk and the chain code.
 The message signing and signature verifying is compatible /w ED25519.
 
-Note: 
 
 
 # Restrictions
@@ -96,8 +97,9 @@ Some of them (such as Yoroi), just clear that `additional` 3rd bit, while others
 
  ## Resolution
 
-There are different type of resolutions. The most proper way would be: generate only a `BIP32-ED25519` compatible 24-word mnemonics and therefore a 256-bit long master secret for new wallets and discard others.
+There can be different type of resolutions. The most proper way would be: generate only a `BIP32-ED25519` compatible 24-word mnemonics and therefore a 256-bit long master secret for new wallets and discard others (as it's is specified in the `Bip32-Ed25519` paper).
 Then use that 256-bit master secret as `k` specified in `BIP32-ED25519`.
 
 Drawback of this is that half of the already existing user's mnemonics are not compatible, therefore
-they need either to move to a new wallet or using some out-dated master-key generation algorithm.
+they need either to move to a new wallet or using some out-dated master-key generation algorithm. The other disadvantege of this is that it would impact the `plausible-deniability` feature, meaning by when a `BIP32-ED25519` compatible 256-bit long seed is generated from a 24-word mnemonic with using an additional password/passphrase by `BIP-0039`, it could happen that the other seed generated from the same mnemonic, but with no or some different passhprase, would not be `BIP-ED25519` compatible.
+
