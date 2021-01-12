@@ -81,7 +81,9 @@ The [message signing and signature verifying is compatible /w ED25519](https://r
 The 96-byte long BIP32-ED25519 keys contains a ed25519e_sk and the chain code.
 The message signing and signature verifying is compatible /w ED25519.
 
+# References
 
+- [The Provable Security of Ed25519: Theory and Practice](https://eprint.iacr.org/2020/823.pdf)
 
 # Restrictions
 

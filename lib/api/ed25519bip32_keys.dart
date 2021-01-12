@@ -14,7 +14,10 @@ class Bip32VerifyKey extends VerifyKey with Bip32PublicKey {
     _chainCode = ChainCode(suffix);
   }
 
-  // prefixLength has a late binding
+  Bip32VerifyKey.fromKeyBytes(List<int> pubBytes, List<int> chainCodeBytes,
+      {int depth = 0})
+      : this(pubBytes.toList() + chainCodeBytes.toList(), depth: depth);
+
   @override
   final int prefixLength = keyLength - ChainCode.chainCodeLength;
 
@@ -41,39 +44,30 @@ class Bip32VerifyKey extends VerifyKey with Bip32PublicKey {
 
 class Bip32SigningKey extends ExtendedSigningKey with Bip32PrivateKey {
   /// Throws Error as it is very dangerous to have non prune-to-buffered bytes.
-  factory Bip32SigningKey(List<int> secretKey) {
-    if (!isValidBits(secretKey)) {
-      throw Exception('Secret is not valid BIP32-ED25519 Extended key');
-    }
-    return Bip32SigningKey.normalizeBytes(secretKey);
-  }
+  Bip32SigningKey(List<int> secretBytes)
+      : this.normalizeBytes(validateKeyBits(secretBytes));
 
-  Bip32SigningKey.normalizeBytes(List<int> secretBytes, {int depth = 0})
-      : this.fromValidBytes(
-            setBits(secretBytes), _toPublic(setBits(secretBytes)),
-            secretLength: keyLength);
-
-  factory Bip32SigningKey.decode(String key, {Encoder coder = decoder}) {
-    final decoded = coder.decode(key);
-    return Bip32SigningKey(decoded);
-  }
-
-  Bip32SigningKey.fromValidBytes(List<int> secret, List<int> public,
-      {int secretLength = keyLength, this.depth = 0})
-      : _verifyKey = Bip32VerifyKey(public),
-        super.fromValidBytes(setBits(secret), _toPublic(setBits(secret)),
-            secretLength: keyLength) {
-    _chainCode = ChainCode(suffix);
-  }
-
-  Bip32SigningKey.fromVerifiedBytes(List<int> verifiedBytes, {int depth = 0})
-      : this.fromValidBytes(verifiedBytes, _toPublic(verifiedBytes),
-            secretLength: keyLength);
+  Bip32SigningKey.decode(String key, {Encoder coder = decoder})
+      : this(coder.decode(key));
 
   Bip32SigningKey.generate()
       : this.normalizeBytes(TweetNaCl.randombytes(keyLength));
 
-  static VerifyKey _toPublic(List<int> secret) {
+  Bip32SigningKey.normalizeBytes(List<int> secretBytes, {int depth = 0})
+      : this.fromValidBytes(clampKey(secretBytes), depth: depth);
+
+  Bip32SigningKey.fromValidBytes(List<int> secret, {this.depth = 0})
+      : super.fromValidBytes(validateKeyBits(secret), keyLength: keyLength) {
+    /// TODO super.verifyKey;
+    _verifyKey = _toPublic(validateKeyBits(secret));
+    _chainCode = ChainCode(suffix);
+  }
+
+  Bip32SigningKey.fromKeyBytes(List<int> secret, List<int> chainCode,
+      {int depth = 0})
+      : this.fromValidBytes(secret.toList() + chainCode.toList(), depth: depth);
+
+  static Bip32VerifyKey _toPublic(List<int> secret) {
     var left = List.filled(TweetNaCl.publicKeyLength, 0);
     var pk = Uint8List.fromList(
         left + secret.sublist(keyLength - ChainCode.chainCodeLength));
@@ -82,12 +76,18 @@ class Bip32SigningKey extends ExtendedSigningKey with Bip32PrivateKey {
     return Bip32VerifyKey(pk);
   }
 
-  static bool isValidBits(List<int> bytes) {
-    return ExtendedSigningKey.isValidBits(bytes) && (bytes[31] & 32) == 0;
+  static List<int> validateKeyBits(List<int> bytes) {
+    bytes = ExtendedSigningKey.validateKeyBits(bytes);
+
+    if ((bytes[31] & 32) != 0) {
+      throw InvalidSigningKeyError();
+    }
+    return bytes;
   }
 
-  static List<int> setBits(List<int> bytes) {
-    bytes = ExtendedSigningKey.setBits(bytes);
+  static List<int> clampKey(List<int> bytes) {
+    bytes = ExtendedSigningKey.clampKey(bytes, keyLength);
+    // clear the 3rd bit
     bytes[31] &= 223;
     return bytes;
   }
@@ -97,6 +97,7 @@ class Bip32SigningKey extends ExtendedSigningKey with Bip32PrivateKey {
   final int prefixLength = keyLength - ChainCode.chainCodeLength;
 
   static const keyLength = 96;
+
   final int depth;
 
   ByteList get keyBytes => prefix;
@@ -104,7 +105,7 @@ class Bip32SigningKey extends ExtendedSigningKey with Bip32PrivateKey {
   @override
   ChainCode get chainCode => _chainCode;
   late final ChainCode _chainCode;
-  final Bip32VerifyKey _verifyKey;
+  late final Bip32VerifyKey _verifyKey;
 
   @override
   Bip32VerifyKey get verifyKey => _verifyKey;

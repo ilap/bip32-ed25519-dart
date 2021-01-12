@@ -2,13 +2,13 @@ import 'dart:typed_data';
 
 import 'package:bip32_ed25519/api.dart';
 
-class CardanoKeyTree extends Bip32KeyTree  {
+class CardanoKeyTree extends Bip32KeyTree {
   CardanoKeyTree.seed(String seed) : super.seed(seed);
   CardanoKeyTree.import(String key) : super.import(key);
 
   @override
   Bip32Key master(Uint8List seed) {
-    return Bip32SigningKey.fromVerifiedBytes(seed);
+    return Bip32SigningKey.fromValidBytes(seed);
   }
 
   @override

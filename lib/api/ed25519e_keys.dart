@@ -2,36 +2,34 @@ import 'dart:typed_data';
 import 'package:pinenacl/api.dart';
 //part of bip32_ed25519.api;
 
-class ExtendedSigningKey extends SigningKey {
-  /// Throws Error as it is very dangerous to have non prune-to-buffered bytes.
-  factory ExtendedSigningKey(List<int> extendedKey) {
-    if (!isValidBits(extendedKey)) {
-      throw Exception('Secret is not valid ED25519 Extended key');
-    }
-    return ExtendedSigningKey.normalizeBytes(extendedKey);
-  }
+class InvalidSigningKeyError extends Error {}
 
-  factory ExtendedSigningKey.decode(String key, {Encoder coder = decoder}) {
-    final decoded = coder.decode(key);
-    return ExtendedSigningKey(decoded);
-  }
+class ExtendedSigningKey extends SigningKey {
+  // Throws Error as it is very dangerous to have non prune-to-buffered bytes.
+  ExtendedSigningKey(List<int> secretBytes) : this.fromValidBytes(secretBytes);
+  ExtendedSigningKey.fromSeed(List<int> seed) : this(_seedToSecret(seed));
+
+  ExtendedSigningKey.decode(String keyString, {Encoder coder = decoder})
+      : this(coder.decode(keyString));
+
+  ExtendedSigningKey.generate()
+      : this.normalizeBytes(TweetNaCl.randombytes(keyLength));
 
   ExtendedSigningKey.normalizeBytes(List<int> secretBytes)
-      : this.fromValidBytes(setBits(secretBytes), _toPublic(setBits(secretBytes)), secretLength: extendedKeySize);
+      : this.fromValidBytes(clampKey(secretBytes, keyLength),
+            keyLength: keyLength);
 
-  ExtendedSigningKey.fromValidBytes(List<int> secret, List<int> public, {int secretLength = TweetNaCl.signingKeyLength})
-      : super.fromValidBytes(setBits(secret), _toPublic(setBits(secret)), secretLength: secretLength);
-
-  ExtendedSigningKey.fromVerifiedBytes(List<int> verifiedBytes)
-      : this.fromValidBytes(verifiedBytes, _toPublic(verifiedBytes));
-
-
-  ExtendedSigningKey.fromSeed(List<int> seed): this.fromVerifiedBytes(_seedToSecret(seed));
-  ExtendedSigningKey.generate(): this.fromSeed(TweetNaCl.randombytes(TweetNaCl.seedSize));
+  ExtendedSigningKey.fromValidBytes(List<int> secret,
+      {int keyLength = keyLength})
+      : super.fromValidBytes(validateKeyBits(secret), keyLength: keyLength);
 
   static List<int> _seedToSecret(List<int> seed) {
+    if (seed.length != seedSize) {
+      throw Exception(
+          'Seed\'s length (${seed.length}) must be $seedSize long.');
+    }
     final extendedSecret = Hash.sha512(seed);
-    return setBits(extendedSecret);
+    return clampKey(extendedSecret, keyLength);
   }
 
   static VerifyKey _toPublic(List<int> secret) {
@@ -40,27 +38,37 @@ class ExtendedSigningKey extends SigningKey {
     return VerifyKey(pk);
   }
 
-  static const extendedKeySize = 64;
+  static const seedSize = TweetNaCl.seedSize;
 
-  // prefixLength is a late binding variable.
   @override
   final int prefixLength = keyLength;
 
   static const keyLength = 64;
 
-  ByteList get keyBytes => prefix;
-
-  //late final VerifyKey _verifyKey;
+  VerifyKey? _verifyKey;
 
   @override
-  VerifyKey get publicKey => super.verifyKey;
+  VerifyKey get verifyKey => _verifyKey ??= _toPublic(this);
 
-  static bool isValidBits(List<int> bytes) {
-    return ((bytes[0] & 7) == 0) &
-        ((bytes[31] & 192) == 64);
+  @override
+  VerifyKey get publicKey => verifyKey;
+
+  ByteList get keyBytes => prefix;
+
+  /// Throws an error on invalid bytes and return the bytes itself anyway
+  static List<int> validateKeyBits(List<int> bytes) {
+    var valid = ((bytes[0] & 7) == 0) && ((bytes[31] & 192) == 64);
+    if (bytes.length < 32 || !valid) {
+      throw InvalidSigningKeyError();
+    }
+
+    return bytes;
   }
 
-  static List<int> setBits(List<int> bytes) {
+  static List<int> clampKey(List<int> bytes, int byteLength) {
+    if (bytes.length != byteLength) {
+      throw InvalidSigningKeyError();
+    }
     var resultBytes = List<int>.from(bytes);
     resultBytes[0] &= 248;
     resultBytes[31] &= 127;

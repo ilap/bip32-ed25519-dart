@@ -24,7 +24,8 @@ class DigitalSignatures extends BenchmarkBase {
 
   // Seed is the first 32 bytes of an 64-byte-long ed25519 private/secret key.
   // it generates an extended key by SHA512-ing and prune-to-buffer-ing the seed.
-  final signingKey = ExtendedSigningKey.fromSeed(hex.decode(priv).sublist(0, 32));
+  final signingKey =
+      ExtendedSigningKey.fromSeed(hex.decode(priv).sublist(0, 32));
   final verifyKey = VerifyKey(hex.decode(pub));
   static void main() {
     DigitalSignatures().report();
