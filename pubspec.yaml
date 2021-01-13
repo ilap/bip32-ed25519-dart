@@ -1,15 +1,15 @@
 name: bip32_ed25519
 description: The Dart implementation of the BIP32-Ed25519 the deterministic key generation solution for the Ed25519 curve.
-version: 0.0.1-nullsafety.1
+version: 0.0.1-nullsafety.2
 homepage: https://github.com/ilap/bip32-ed25519-dart
 publish_to: none
 environment:
   sdk: '>=2.12.0-0 <3.0.0'
 
 dependencies:
-  pinenacl: ^0.2.0-nullsafety
-  #pinenacl:
-  #  path: ../pinenacl-dart
+  #pinenacl: ^0.2.0-nullsafety
+  pinenacl:
+    path: ../pinenacl-dart
 
 dev_dependencies:
   bip39: 

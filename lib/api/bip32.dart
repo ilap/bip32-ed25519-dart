@@ -1,7 +1,7 @@
 part of bip32_ed25519.api;
 
 class ChainCode extends ByteList {
-  ChainCode(List<int> bytes) : super(bytes, chainCodeLength);
+  ChainCode(Uint8List bytes) : super(bytes, chainCodeLength);
   static const int chainCodeLength = 32;
 }
 
@@ -13,12 +13,29 @@ mixin Bip32Key on AsymmetricKey {
 }
 
 mixin Bip32PrivateKey on AsymmetricPrivateKey implements Bip32Key {
-  Bip32PrivateKey master(List<int> seed);
+  Bip32PrivateKey master(Uint8List seed);
   ByteList get keyBytes => prefix;
 }
 
 mixin Bip32PublicKey on AsymmetricPublicKey implements Bip32Key {
   ByteList get keyBytes => prefix;
+}
+
+abstract class Bip32ChildKeyDerivaton {
+  /// Private parent key to private child key
+  Bip32PrivateKey ckdPriv(Bip32PrivateKey parentSecret, int index);
+
+  /// Public parent key to public child key
+  Bip32PublicKey ckdPub(Bip32PublicKey parentSecret, int index);
+
+  /// Private parent key to public Child key
+  Bip32PublicKey neuterPriv(Bip32PrivateKey parentSecret, int index);
+
+  /// Public parent key to private child key
+  /// It is imposibble
+  
+  /// Master key Derivation
+  Bip32PrivateKey master(Uint8List masterSecret);
 }
 
 abstract class Bip32KeyTree {

@@ -6,8 +6,8 @@ class InvalidSigningKeyError extends Error {}
 
 class ExtendedSigningKey extends SigningKey {
   // Throws Error as it is very dangerous to have non prune-to-buffered bytes.
-  ExtendedSigningKey(List<int> secretBytes) : this.fromValidBytes(secretBytes);
-  ExtendedSigningKey.fromSeed(List<int> seed) : this(_seedToSecret(seed));
+  ExtendedSigningKey(Uint8List secretBytes) : this.fromValidBytes(secretBytes);
+  ExtendedSigningKey.fromSeed(Uint8List seed) : this(_seedToSecret(seed));
 
   ExtendedSigningKey.decode(String keyString, {Encoder coder = decoder})
       : this(coder.decode(keyString));
@@ -15,15 +15,15 @@ class ExtendedSigningKey extends SigningKey {
   ExtendedSigningKey.generate()
       : this.normalizeBytes(TweetNaCl.randombytes(keyLength));
 
-  ExtendedSigningKey.normalizeBytes(List<int> secretBytes)
+  ExtendedSigningKey.normalizeBytes(Uint8List secretBytes)
       : this.fromValidBytes(clampKey(secretBytes, keyLength),
             keyLength: keyLength);
 
-  ExtendedSigningKey.fromValidBytes(List<int> secret,
+  ExtendedSigningKey.fromValidBytes(Uint8List secret,
       {int keyLength = keyLength})
       : super.fromValidBytes(validateKeyBits(secret), keyLength: keyLength);
 
-  static List<int> _seedToSecret(List<int> seed) {
+  static Uint8List _seedToSecret(Uint8List seed) {
     if (seed.length != seedSize) {
       throw Exception(
           'Seed\'s length (${seed.length}) must be $seedSize long.');
@@ -32,7 +32,7 @@ class ExtendedSigningKey extends SigningKey {
     return clampKey(extendedSecret, keyLength);
   }
 
-  static VerifyKey _toPublic(List<int> secret) {
+  static VerifyKey _toPublic(Uint8List secret) {
     var pk = Uint8List(TweetNaCl.publicKeyLength);
     TweetNaClExt.scalar_base(pk, Uint8List.fromList(secret));
     return VerifyKey(pk);
@@ -56,7 +56,7 @@ class ExtendedSigningKey extends SigningKey {
   ByteList get keyBytes => prefix;
 
   /// Throws an error on invalid bytes and return the bytes itself anyway
-  static List<int> validateKeyBits(List<int> bytes) {
+  static Uint8List validateKeyBits(Uint8List bytes) {
     var valid = ((bytes[0] & 7) == 0) && ((bytes[31] & 192) == 64);
     if (bytes.length < 32 || !valid) {
       throw InvalidSigningKeyError();
@@ -65,19 +65,19 @@ class ExtendedSigningKey extends SigningKey {
     return bytes;
   }
 
-  static List<int> clampKey(List<int> bytes, int byteLength) {
+  static Uint8List clampKey(Uint8List bytes, int byteLength) {
     if (bytes.length != byteLength) {
       throw InvalidSigningKeyError();
     }
-    var resultBytes = List<int>.from(bytes);
-    resultBytes[0] &= 248;
-    resultBytes[31] &= 127;
-    resultBytes[31] |= 64;
+    var resultBytes = Uint8List.fromList(bytes);
+    resultBytes[0] &= 0xF8; // clear the last 3 bits
+    resultBytes[31] &= 0x7F; // clear the 1st bit
+    resultBytes[31] |= 0x40; // set the 2nd bit
     return resultBytes;
   }
 
   @override
-  //SignedMessage sign(List<int> message, {bool extended: false}) => super.sign(message, extended: true);
+  //SignedMessage sign(Uint8List message, {bool extended: false}) => super.sign(message, extended: true);
   SignedMessage sign(List<int> message) {
     // signed message
     var sm = Uint8List(message.length + TweetNaCl.signatureLength);
