@@ -2,6 +2,10 @@ import 'package:test/test.dart';
 import 'package:bip32_ed25519/api.dart';
 
 void main() {
+
+  const xprvCoder = Bech32Coder(hrp: 'xprv');
+  const xpubCoder = Bech32Coder(hrp: 'xpub');
+
   //const mnemonic =
   //    "art forum devote street sure rather head chuckle guard poverty release quote oak craft enemy";
   // const entropy = [0x0c, 0xcb, 0x74, 0xf3, 0x6b, 0x7d, 0xa1, 0x64, 0x9a, 0x81, 0x44, 0x67,  0x55, 0x22, 0xd4, 0xd8, 0x09, 0x7c, 0x64,    0x12  ]; // 20
@@ -46,8 +50,8 @@ void main() {
     });
 
     test('Bip32 key testvectors', () {
-      var xprv = Bip32SigningKey.decode(xPrv);
-      var xpub = Bip32VerifyKey.decode(xPub);
+      var xprv = Bip32SigningKey.decode(xPrv, coder: xprvCoder);
+      var xpub = Bip32VerifyKey.decode(xPub, coder: xpubCoder);
       doSigningTest(xprv, xpub);
     });
   });
@@ -92,7 +96,7 @@ void main() {
       // expect(() => ExtendedSigningKey(), throwsA(allOf(isArgumentError, predicate((e) => e.message == 'Error'))));
     });
     test('Bip32-Ed25519 key constructors', () {
-      final xprv = Bip32SigningKey.decode(xPrv);
+      final xprv = Bip32SigningKey.decode(xPrv, coder: xprvCoder);
       final chainCode = xprv.chainCode;
 
       final pubBytes = HexCoder.instance.decode(publicBytesHex).sublist(0, 32);
@@ -109,7 +113,7 @@ void main() {
 
       expect(() => Bip32SigningKey.fromValidBytes(xprv), returnsNormally);
 
-      expect(() => Bip32SigningKey.decode(xPrv), returnsNormally);
+      expect(() => Bip32SigningKey.decode(xPrv, coder: xprvCoder), returnsNormally);
 
       // Throws errors or exceptions as the 2nd bit is not set
       expect(() => Bip32SigningKey(_32),

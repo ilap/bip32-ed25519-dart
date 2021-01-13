@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:test/test.dart';
 import 'package:bip32_ed25519/api.dart';
 
+
 void main() {
+  const xprvCoder = Bech32Coder(hrp: 'xprv');
+  const xpubCoder = Bech32Coder(hrp: 'xpub');
   group('Key derivation tests', () {
       final dir = Directory.current;
       final file = File('${dir.path}/test/data/yoroi_keys.json');
@@ -14,8 +16,6 @@ void main() {
       final dynamic yoroi = JsonDecoder().convert(contents);
 
       final dynamic keypairs = yoroi['keypairs'];
-      final xprvCoder = Bech32Coder(hrp: 'xprv');
-      final xpubCoder = Bech32Coder(hrp: 'xpub');
 
       final dynamic ak = yoroi['account_prv'] !as String;
       final dynamic aK = yoroi['account_pub'] !as String;
