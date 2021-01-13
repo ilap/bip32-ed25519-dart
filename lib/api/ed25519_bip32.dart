@@ -103,19 +103,24 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivaton {
       _derive(parentKey, [0x01, 0x03], index).sublist(32);
 
   /// Public parent key to public child key
+  ///
   /// I computes a child extended private key from the parent extended private key.
   Bip32PrivateKey ckdPriv(Bip32PrivateKey parentKey, int index) =>
       _ckd(parentKey, index) as Bip32PrivateKey;
 
   /// Public parent key to public child key
+  ///
   /// It computes a child extended public key from the parent extended public key.
   /// It is only defined for non-hardened child keys.
   Bip32PublicKey ckdPub(Bip32PublicKey parentKey, int index) =>
       _ckd(parentKey, index) as Bip32PublicKey;
 
   /// Private parent key to public Child key
-  Bip32PublicKey neuterPriv(Bip32PrivateKey k, int index) =>
-      ckdPub(k.publicKey as Bip32PublicKey, index);
+  ///
+  /// It computes the extended public key corresponding to an extended private
+  /// key a.k.a the `neutered` version, as it removes the ability to sign transactions.
+  ///
+  Bip32PublicKey neuterPriv(Bip32PrivateKey k) => Bip32VerifyKey(k.publicKey);
 
   Bip32Key _ckd(Bip32Key parentKey, int index) {
     final ci = _deriveC(parentKey, index);
@@ -336,24 +341,24 @@ void main() {
   final xprvCoder = Bech32Coder(hrp: 'xprv');
   final xpubCoder = Bech32Coder(hrp: 'xpub');
   final _kp = Bip32SigningKey.decode(csk_0, coder: xprvCoder);
-  final _Kp = Bip32VerifyKey.decode(cpk_0,coder: xpubCoder);
+  final _Kp = Bip32VerifyKey.decode(cpk_0, coder: xpubCoder);
 
   final dc = Bip32Ed25519KeyDerivation.instance;
 
-  final masterSecret = TweetNaCl.randombytes(32);
+  //final masterSecret = TweetNaCl.randombytes(32);
   //final m = dc.master(masterSecret);
 
   //final M = dc.forP
 
-  final derived = dc.ckdPriv(_kp, 0);
-  final derived1 = dc.ckdPub(_Kp, 0);
+  Bip32PrivateKey derivedPrv;
+  Bip32PublicKey derivedPub;
 
-  print(derived.encode(xprvCoder));
-  print(derived1.encode(xpubCoder));
+  for (var i = 0; i < 2; i++) {
+    derivedPrv = dc.ckdPriv(_kp, i);
+    derivedPub = dc.ckdPub(_Kp, i);
 
-  final derived2 = dc.ckdPriv(_kp, 1);
-  final derived3 = dc.ckdPub(_Kp, 1);
-
-  print(derived2.encode(xprvCoder));
-  print(derived3.encode(xpubCoder));
+    print(derivedPrv.encode(xprvCoder));
+    print(derivedPub.encode(xpubCoder));
+    assert(dc.neuterPriv(derivedPrv) == derivedPub);
+  }
 }

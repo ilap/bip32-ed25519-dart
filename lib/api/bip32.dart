@@ -29,12 +29,12 @@ abstract class Bip32ChildKeyDerivaton {
   Bip32PublicKey ckdPub(Bip32PublicKey parentSecret, int index);
 
   /// Private parent key to public Child key
-  Bip32PublicKey neuterPriv(Bip32PrivateKey parentSecret, int index);
+  Bip32PublicKey neuterPriv(Bip32PrivateKey parentSecret);
 
   /// Public parent key to private child key
   /// It is imposibble
   
-  /// Master key Derivation
+  /// Master key generation
   Bip32PrivateKey master(Uint8List masterSecret);
 }
 
