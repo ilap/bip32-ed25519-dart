@@ -51,6 +51,22 @@ TBD
 |                 | derive(index)                                           | Inherited from VerifyKey                                                              | check index range                                                              |
 |                 | chainCode => ChainCode(suffix)                          | Returns /w a chain code value object                                                  | check length                                                                   |
 |                 | getExtended => ExtendedPublicKey.fromValidBytes(prefix) | Returns and extended key as every `Bip32-Ed25519` is a valid `Extended   Ed25519` key | It's cheap operation                                                           |
+
+## Key Standardization
+
+| KeyPair          | key           | verifyKey    | encryptionKey | publicKey     | rawKey      | Comment                                  |
+|------------------|---------------|--------------|---------------|---------------|-------------|------------------------------------------|
+| ed25519          | ed25519_sk    | ed25519_pk   | N/A           | verifyKey     | ed25519_sk  | This is   the 32-byte long seed          |
+|                  | ed25519_skpk  | ed25519_pk   | N/A           | verifyKey     | ed25519_sk  | rawKey   is the 32-byte long seed        |
+|                  | ed25519_pk    | ed25519_pk   | N/A           | verifyKey     | ed25519_pk  | rawKey   is the key itself               |
+| Extended Ed25519 | ed25519_esk   | ed25519_pk   | x25519_sk     | verifyKey     | ed25519_esk | rawKey   is the key itself               |
+|                  | ed25519_pk    | ed25519_pk   | x25519_pk     | verifyKey     | ed25519_pk  | rawKey   is the key itself               |
+| Bip32-Ed25519    | ed25519_eskcc | ed25519_pkcc | x25519_sk     | verifyKey     | ed25519_esk | rawKey   a valid extended key            |
+|                  | ed25519_pkcc  | ed25519_pkcc | x25519_pk     | verifyKey     | ed25519_pk  | rawKeys   is a valid Ed25519 signing key |
+| X25519           | x25519_sk     | N/A          | x25519_pk     | encryptionKey | x25519_sk   | rawKey   is the key itself               |
+|                  | x25519_pk     | N/A          | x25519_pk     | encryptionKey | x25519_pk   | rawKey   is the key itself               |
+
+
 ### ED25519 Keys
 
 The [ed25519](http://ed25519.cr.yp.to/) is an 

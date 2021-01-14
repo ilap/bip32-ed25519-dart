@@ -17,12 +17,12 @@ void main() {
 
       final dynamic keypairs = yoroi['keypairs'];
 
-      final dynamic ak = yoroi['account_prv'] !as String;
-      final dynamic aK = yoroi['account_pub'] !as String;
+      final dynamic ck = yoroi['chain_prv'] !as String;
+      final dynamic cK = yoroi['chain_pub'] !as String;
 
       final derivator = Bip32Ed25519KeyDerivation.instance;
-      final accountPrv = Bip32SigningKey.decode(ak, coder: xprvCoder);
-      final accountPub = Bip32VerifyKey.decode(aK, coder: xpubCoder);
+      final chainPrv = Bip32SigningKey.decode(ck, coder: xprvCoder);
+      final chainPub = Bip32VerifyKey.decode(cK, coder: xpubCoder);
 
       var idx = 0;
       keypairs.asMap().forEach((index, dynamic keypair) {
@@ -35,8 +35,8 @@ void main() {
           final k = Bip32SigningKey.decode(xprv, coder: xprvCoder);
           final K = Bip32VerifyKey.decode(xpub, coder: xpubCoder);
 
-          final derivedPrv = derivator.ckdPriv(accountPrv, idx);
-          final derivedPub = derivator.ckdPub(accountPub, idx);
+          final derivedPrv = derivator.ckdPriv(chainPrv, idx);
+          final derivedPub = derivator.ckdPub(chainPub, idx);
           assert(k == derivedPrv);
           assert(K == derivedPub);
           idx++;

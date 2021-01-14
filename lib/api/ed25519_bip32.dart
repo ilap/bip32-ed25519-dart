@@ -13,8 +13,57 @@ class InvalidBip32Ed25519IndexException implements Exception {}
 
 class InvalidBip32Ed25519MasterSecretException implements Exception {}
 
+/// 
+/// This is the dart implementation of the `BIP32-Ed25519 Hierarchical
+/// Deterministic Keys over a Non-linear Keyspace` key derivation
+/// algorythm.
+/// 
+class Bip32Ed25519 extends Bip32Ed25519KeyDerivation with Bip32KeyTree {
+  Bip32Ed25519(Uint8List masterSeed) {
+    this.root = master(masterSeed);
+  }
+  Bip32Ed25519.seed(String seed) {
+    this.root = master(HexCoder.instance.decode(seed));
+  }
+
+  Bip32Ed25519.import(String key) {
+    this.root = doImport(key);
+  }
+
+  /// The default implementation of the origianl BIP32-ED25519's master key
+  /// generation.
+  Bip32Key master(Uint8List masterSecret) {
+    final secretBytes = Hash.sha512(masterSecret);
+
+    if ((secretBytes[31] &= 0x20) != 0)
+      throw InvalidBip32Ed25519MasterSecretException();
+
+    final rootChainCode =
+        Hash.sha256(Uint8List.fromList([0x01, ...masterSecret]));
+
+    final rootKey = Bip32SigningKey.normalizeBytes(
+        Uint8List.fromList([...secretBytes, ...rootChainCode]));
+
+    Bip32Ed25519KeyDerivation._memzero(masterSecret);
+    Bip32Ed25519KeyDerivation._memzero(rootChainCode);
+
+    return rootKey;
+  }
+
+  @override
+  Bip32Key doImport(String key) {
+      try {
+        return Bip32VerifyKey.decode(key);
+      } catch (e) {
+        return Bip32SigningKey.decode(key);
+      }
+  }
+}
+
 class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivaton {
+  const Bip32Ed25519KeyDerivation(): this._singleton();
   const Bip32Ed25519KeyDerivation._singleton();
+
 
   static const Bip32Ed25519KeyDerivation instance =
       Bip32Ed25519KeyDerivation._singleton();
@@ -157,26 +206,6 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivaton {
       return result;
     }
   }
-
-  /// The default implementation of the origianl BIP32-ED25519's master key
-  /// generation.
-  Bip32PrivateKey master(Uint8List masterSecret) {
-    final secretBytes = Hash.sha512(masterSecret);
-
-    if ((secretBytes[31] &= 0x20) != 0)
-      throw InvalidBip32Ed25519MasterSecretException();
-
-    final rootChainCode =
-        Hash.sha256(Uint8List.fromList([0x01, ...masterSecret]));
-
-    final rootKey = Bip32SigningKey.normalizeBytes(
-        Uint8List.fromList([...secretBytes, ...rootChainCode]));
-
-    _memzero(masterSecret);
-    _memzero(rootChainCode);
-
-    return rootKey;
-  }
 }
 
 class Bip32VerifyKey extends VerifyKey with Bip32PublicKey {
@@ -202,7 +231,7 @@ class Bip32VerifyKey extends VerifyKey with Bip32PublicKey {
   final int depth;
 
   @override
-  ByteList get keyBytes => prefix;
+  ByteList get rawKey => prefix;
 
   late final ChainCode _chainCode;
 
@@ -278,7 +307,7 @@ class Bip32SigningKey extends ExtendedSigningKey with Bip32PrivateKey {
   final int depth;
 
   @override
-  ByteList get keyBytes => prefix;
+  ByteList get rawKey => prefix;
 
   @override
   ChainCode get chainCode => _chainCode;
@@ -293,11 +322,6 @@ class Bip32SigningKey extends ExtendedSigningKey with Bip32PrivateKey {
 
   @override
   Bip32SigningKey derive(index) {
-    return this;
-  }
-
-  @override
-  Bip32SigningKey master(Uint8List seed) {
     return this;
   }
 

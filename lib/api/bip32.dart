@@ -7,19 +7,15 @@ class ChainCode extends ByteList {
 
 mixin Bip32Key on AsymmetricKey {
   ChainCode get chainCode;
-  ByteList get keyBytes;
-
+  ByteList get rawKey;
   Bip32Key derive(int index);
 }
 
-mixin Bip32PrivateKey on AsymmetricPrivateKey implements Bip32Key {
-  Bip32PrivateKey master(Uint8List seed);
-  ByteList get keyBytes => prefix;
-}
+mixin Bip32PrivateKey on AsymmetricPrivateKey implements Bip32Key {}
 
-mixin Bip32PublicKey on AsymmetricPublicKey implements Bip32Key {
-  ByteList get keyBytes => prefix;
-}
+mixin Bip32PublicKey on AsymmetricPublicKey implements Bip32Key {}
+
+mixin Bip32 implements Bip32ChildKeyDerivaton, Bip32KeyTree {}
 
 abstract class Bip32ChildKeyDerivaton {
   /// Private parent key to private child key
@@ -33,20 +29,31 @@ abstract class Bip32ChildKeyDerivaton {
 
   /// Public parent key to private child key
   /// It is imposibble
-  
-  /// Master key generation
-  Bip32PrivateKey master(Uint8List masterSecret);
+
 }
 
+/// Key Tree
+/// 
+/// Each leaf node in the tree corresponds to an actual key, while the
+/// internal nodes correspond to the collections of keys that descend from
+/// them. The chain codes of the leaf nodes are ignored, and only their
+/// embedded private or public key is relevant. Because of this construction,
+/// knowing an extended private key allows reconstruction of all descendant
+/// private keys and public keys, and knowing an extended public keys allows
+/// reconstruction of all descendant non-hardened public keys
+/// Source: [BIP-0032](https://en.bitcoin.it/wiki/BIP_0032#The_key_tree)
+
 abstract class Bip32KeyTree {
-  Bip32KeyTree.seed(String seed) {
-    this.root = master(HexCoder.instance.decode(seed));
-  }
+ // Bip32KeyTree.seed(String seed) {
+ //   this.root = master(HexCoder.instance.decode(seed));
+ // }
 
-  Bip32KeyTree.import(String key) {
-    this.root = doImport(key);
-  }
+ // Bip32KeyTree.import(String key) {
+ //   this.root = doImport(key);
+ // }
 
+  // hierarchy dept.
+  static final int maxDepth = 1024;
   late final Bip32Key root;
 
   static const int hardenedIndex = 0x80000000;

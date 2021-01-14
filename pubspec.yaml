@@ -12,7 +12,6 @@ dependencies:
   #  path: ../pinenacl-dart
 
 dev_dependencies:
-  bip39: 
   pedantic: ^1.10.0-nullsafety
   test: ^1.16.0-nullsafety
   benchmark_harness: ^2.0.0-nullsafety
