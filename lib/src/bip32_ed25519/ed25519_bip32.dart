@@ -1,23 +1,25 @@
 import 'dart:typed_data';
 
-import 'package:bip32_ed25519/api/ed25519_extended.dart';
+import 'package:pinenacl/ed25519.dart';
+import 'package:pinenacl/hashing.dart';
+import 'package:pinenacl/tweetnacl.dart';
+import 'package:pinenacl/message_authentication.dart';
+import 'package:bip32_ed25519/src/bip32_ed25519/ed25519_extended.dart';
 import 'package:bip32_ed25519/api.dart';
 
 // Errors
-
 class InvalidBip23Ed25519DerivationKeyError extends Error {}
 
 // Exceptions
-
 class InvalidBip32Ed25519IndexException implements Exception {}
 
 class InvalidBip32Ed25519MasterSecretException implements Exception {}
 
-/// 
+///
 /// This is the dart implementation of the `BIP32-Ed25519 Hierarchical
 /// Deterministic Keys over a Non-linear Keyspace` key derivation
 /// algorythm.
-/// 
+///
 class Bip32Ed25519 extends Bip32Ed25519KeyDerivation with Bip32KeyTree {
   Bip32Ed25519(Uint8List masterSeed) {
     this.root = master(masterSeed);
@@ -38,32 +40,30 @@ class Bip32Ed25519 extends Bip32Ed25519KeyDerivation with Bip32KeyTree {
     if ((secretBytes[31] &= 0x20) != 0)
       throw InvalidBip32Ed25519MasterSecretException();
 
-    final rootChainCode =
-        Hash.sha256(Uint8List.fromList([0x01, ...masterSecret]));
+    final rootChainCode = Hash.sha256([0x01, ...masterSecret].toUint8List());
 
     final rootKey = Bip32SigningKey.normalizeBytes(
-        Uint8List.fromList([...secretBytes, ...rootChainCode]));
+        [...secretBytes, ...rootChainCode].toUint8List());
 
-    Bip32Ed25519KeyDerivation._memzero(masterSecret);
-    Bip32Ed25519KeyDerivation._memzero(rootChainCode);
+    PineNaClUtils.listZero(masterSecret);
+    PineNaClUtils.listZero(rootChainCode);
 
     return rootKey;
   }
 
   @override
   Bip32Key doImport(String key) {
-      try {
-        return Bip32VerifyKey.decode(key);
-      } catch (e) {
-        return Bip32SigningKey.decode(key);
-      }
+    try {
+      return Bip32VerifyKey.decode(key);
+    } catch (e) {
+      return Bip32SigningKey.decode(key);
+    }
   }
 }
 
 class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivaton {
-  const Bip32Ed25519KeyDerivation(): this._singleton();
+  const Bip32Ed25519KeyDerivation() : this._singleton();
   const Bip32Ed25519KeyDerivation._singleton();
-
 
   static const Bip32Ed25519KeyDerivation instance =
       Bip32Ed25519KeyDerivation._singleton();
@@ -127,18 +127,12 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivaton {
   }
 
   static Uint8List _deriveMessage(
-      Uint8List out, Bip32Key parentKey, prefix, Uint8List suffix) {
+      Uint8List out, Bip32Key parentKey, int prefix, Uint8List suffix) {
     final messageBytes =
-        Uint8List.fromList([prefix, ...parentKey.keyBytes, ...suffix]);
+        [prefix, ...parentKey.keyBytes, ...suffix].toUint8List();
 
-    HmacSha512.mac(out, messageBytes, parentKey.chainCode);
+    Hmac.sha512(out, messageBytes, parentKey.chainCode);
     return out;
-  }
-
-  static void _memzero(Uint8List k, [int offset = 0]) {
-    for (var i = 0; i < k.length; i++) {
-      k[i + offset] = 0;
-    }
   }
 
   // Z is a 64-byte long sequence.
@@ -221,8 +215,7 @@ class Bip32VerifyKey extends VerifyKey with Bip32PublicKey {
 
   Bip32VerifyKey.fromKeyBytes(Uint8List pubBytes, Uint8List chainCodeBytes,
       {int depth = 0})
-      : this(Uint8List.fromList([...pubBytes, ...chainCodeBytes]),
-            depth: depth);
+      : this([...pubBytes, ...chainCodeBytes].toUint8List(), depth: depth);
 
   @override
   final int prefixLength = keyLength - ChainCode.chainCodeLength;
@@ -271,15 +264,15 @@ class Bip32SigningKey extends ExtendedSigningKey with Bip32PrivateKey {
 
   Bip32SigningKey.fromKeyBytes(Uint8List secret, Uint8List chainCode,
       {int depth = 0})
-      : this.fromValidBytes(Uint8List.fromList([...secret, ...chainCode]),
+      : this.fromValidBytes([...secret, ...chainCode].toUint8List(),
             depth: depth);
 
   static Bip32VerifyKey _toPublic(Uint8List secret) {
     var left = List.filled(TweetNaCl.publicKeyLength, 0);
-    var pk = Uint8List.fromList(
-        left + secret.sublist(keyLength - ChainCode.chainCodeLength));
+    var pk = (left + secret.sublist(keyLength - ChainCode.chainCodeLength))
+        .toUint8List();
 
-    TweetNaClExt.scalar_base(pk, Uint8List.fromList(secret));
+    TweetNaClExt.scalar_base(pk, secret.toUint8List());
     return Bip32VerifyKey(pk);
   }
 
@@ -331,6 +324,7 @@ class Bip32SigningKey extends ExtendedSigningKey with Bip32PrivateKey {
   Encoder get encoder => decoder;
 }
 
+/*
 void main() {
   const csk_0 =
       'xprv1cpfh0megyfu4fxyccks4lcszhj2pdj9zdl5plls7r8q50sjfx4yav928dydh94eegljc3hk5jemg37pdh93gh6dmqrz66944m7hkq2k97svm646l363rlgd9nxcs87z7vvjm7tf5kqv07met3nelj90pnsfjclag';
@@ -386,3 +380,4 @@ void main() {
     assert(dc.neuterPriv(derivedPrv) == derivedPub);
   }
 }
+*/

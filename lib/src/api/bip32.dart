@@ -33,7 +33,7 @@ abstract class Bip32ChildKeyDerivaton {
 }
 
 /// Key Tree
-/// 
+///
 /// Each leaf node in the tree corresponds to an actual key, while the
 /// internal nodes correspond to the collections of keys that descend from
 /// them. The chain codes of the leaf nodes are ignored, and only their
@@ -42,15 +42,14 @@ abstract class Bip32ChildKeyDerivaton {
 /// private keys and public keys, and knowing an extended public keys allows
 /// reconstruction of all descendant non-hardened public keys
 /// Source: [BIP-0032](https://en.bitcoin.it/wiki/BIP_0032#The_key_tree)
-
 abstract class Bip32KeyTree {
- // Bip32KeyTree.seed(String seed) {
- //   this.root = master(HexCoder.instance.decode(seed));
- // }
+  // Bip32KeyTree.seed(String seed) {
+  //   this.root = master(HexCoder.instance.decode(seed));
+  // }
 
- // Bip32KeyTree.import(String key) {
- //   this.root = doImport(key);
- // }
+  // Bip32KeyTree.import(String key) {
+  //   this.root = doImport(key);
+  // }
 
   // hierarchy dept.
   static final int maxDepth = 1024;

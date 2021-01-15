@@ -1,8 +1,9 @@
 import 'package:test/test.dart';
+
+import 'package:pinenacl/ed25519.dart';
 import 'package:bip32_ed25519/api.dart';
 
 void main() {
-
   const xprvCoder = Bech32Coder(hrp: 'xprv');
   const xpubCoder = Bech32Coder(hrp: 'xpub');
 
@@ -13,12 +14,12 @@ void main() {
       'xprv1hretan5mml3tq2p0twkhq4tz4jvka7m2l94kfr6yghkyfar6m9wppc7h9unw6p65y23kakzct3695rs32z7vaw3r2lg9scmfj8ec5du3ufydu5yuquxcz24jlkjhsc9vsa4ufzge9s00fn398svhacse5su2awrw';
   const xPub =
       'xpub1eamrnx3pph58yr5l4z2wghjpu2dt2f0rp0zq9qquqa39p52ct0xercjgmegfcpcdsy4t9ld90ps2epmtcjy3jtq77n8z20qe0m3pnfqntgrgj';
-  const secretBytesHex =
-      'b8f2bece9bdfe2b0282f5bad705562ac996efb6af96b648f4445ec44f47ad95c10e3d72f26ed075422a36ed8585c745a0e1150bcceba2357d058636991f38a3791e248de509c070d812ab2fda57860ac876bc489192c1ef4ce253c197ee219a4';
+  //const secretBytesHex =
+  //    'b8f2bece9bdfe2b0282f5bad705562ac996efb6af96b648f4445ec44f47ad95c10e3d72f26ed075422a36ed8585c745a0e1150bcceba2357d058636991f38a3791e248de509c070d812ab2fda57860ac876bc489192c1ef4ce253c197ee219a4';
   const publicBytesHex =
       'cf76399a210de8720e9fa894e45e41e29ab525e30bc402801c076250d1585bcd91e248de509c070d812ab2fda57860ac876bc489192c1ef4ce253c197ee219a4';
-  const chainCode =
-      '91e248de509c070d812ab2fda57860ac876bc489192c1ef4ce253c197ee219a4';
+  //const chainCode =
+  //    '91e248de509c070d812ab2fda57860ac876bc489192c1ef4ce253c197ee219a4';
   const extendedSk =
       'ed25519e_sk1vz4jdwnehsx39zdj6c5n5c9q7r0gp77naw0226m7452ahvckxdvy6tfkllwl8fhpg5mt2akwkc7su4xy26ysn5qfy9jfne5uqfueljsqvy4us';
   const extendedPk =
@@ -113,7 +114,8 @@ void main() {
 
       expect(() => Bip32SigningKey.fromValidBytes(xprv), returnsNormally);
 
-      expect(() => Bip32SigningKey.decode(xPrv, coder: xprvCoder), returnsNormally);
+      expect(() => Bip32SigningKey.decode(xPrv, coder: xprvCoder),
+          returnsNormally);
 
       // Throws errors or exceptions as the 2nd bit is not set
       expect(() => Bip32SigningKey(_32),

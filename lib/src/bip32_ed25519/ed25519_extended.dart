@@ -1,6 +1,9 @@
 import 'dart:typed_data';
 import 'package:pinenacl/api.dart';
-//part of bip32_ed25519.api;
+
+import 'package:pinenacl/ed25519.dart';
+import 'package:pinenacl/hashing.dart';
+import 'package:pinenacl/tweetnacl.dart';
 
 class InvalidSigningKeyError extends Error {}
 
@@ -13,7 +16,7 @@ class ExtendedSigningKey extends SigningKey {
       : this(coder.decode(keyString));
 
   ExtendedSigningKey.generate()
-      : this.normalizeBytes(TweetNaCl.randombytes(keyLength));
+      : this.normalizeBytes(PineNaClUtils.randombytes(keyLength));
 
   ExtendedSigningKey.normalizeBytes(Uint8List secretBytes)
       : this.fromValidBytes(clampKey(secretBytes, keyLength),
@@ -34,7 +37,7 @@ class ExtendedSigningKey extends SigningKey {
 
   static VerifyKey _toPublic(Uint8List secret) {
     var pk = Uint8List(TweetNaCl.publicKeyLength);
-    TweetNaClExt.scalar_base(pk, Uint8List.fromList(secret));
+    TweetNaClExt.scalar_base(pk, secret.toUint8List());
     return VerifyKey(pk);
   }
 
@@ -69,7 +72,7 @@ class ExtendedSigningKey extends SigningKey {
     if (bytes.length != byteLength) {
       throw InvalidSigningKeyError();
     }
-    var resultBytes = Uint8List.fromList(bytes);
+    var resultBytes = bytes.toUint8List();
     resultBytes[0] &= 0xF8; // clear the last 3 bits
     resultBytes[31] &= 0x7F; // clear the 1st bit
     resultBytes[31] |= 0x40; // set the 2nd bit
@@ -81,9 +84,9 @@ class ExtendedSigningKey extends SigningKey {
   SignedMessage sign(List<int> message) {
     // signed message
     var sm = Uint8List(message.length + TweetNaCl.signatureLength);
-    var kb = Uint8List.fromList(this.keyBytes + publicKey);
+    var kb = (this.keyBytes + publicKey).toUint8List();
     final result = TweetNaCl.crypto_sign(
-        sm, -1, Uint8List.fromList(message), 0, message.length, kb,
+        sm, -1, message.toUint8List(), 0, message.length, kb,
         extended: true);
     if (result != 0) {
       throw Exception('Signing the massage is failed');
