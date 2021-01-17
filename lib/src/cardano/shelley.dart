@@ -29,7 +29,7 @@ class CardanoKeyIcarus extends Bip32Ed25519 {
 }
 
 void main() {
-  final hex = HexCoder.instance;
+  //final hex = HexCoder.instance;
   //final masterXprv =
   //    'ed25519bip32_sk1drm35zt6mrym4mg8nqcnyvaju6j40gzf8efn6j3elxztpv2fx4ync2a7ed862ew334g3vns0730578z690399j5mfyu3gzhl8a6n38ulpqtv4efsvk55s0qusjjllcet6nu7wuvvklk76qfvn0ceah7cfuqhjp9f';
   //final masterXpub =

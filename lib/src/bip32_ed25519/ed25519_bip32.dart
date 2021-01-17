@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:pinenacl/ed25519.dart';
 import 'package:pinenacl/hashing.dart';
 import 'package:pinenacl/tweetnacl.dart';
-import 'package:pinenacl/message_authentication.dart';
 import 'package:bip32_ed25519/src/bip32_ed25519/ed25519_extended.dart';
 import 'package:bip32_ed25519/api.dart';
 
@@ -131,7 +130,7 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivaton {
     final messageBytes =
         [prefix, ...parentKey.keyBytes, ...suffix].toUint8List();
 
-    Hmac.sha512(out, messageBytes, parentKey.chainCode);
+    TweetNaClExt.crypto_auth_hmacsha512(out, messageBytes, parentKey.chainCode);
     return out;
   }
 
