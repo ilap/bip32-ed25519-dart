@@ -2,7 +2,7 @@ import 'dart:typed_data';
 import 'package:pinenacl/api.dart';
 
 import 'package:pinenacl/ed25519.dart';
-import 'package:pinenacl/hashing.dart';
+import 'package:pinenacl/digests.dart';
 import 'package:pinenacl/tweetnacl.dart';
 
 class InvalidSigningKeyError extends Error {}
@@ -37,7 +37,7 @@ class ExtendedSigningKey extends SigningKey {
 
   static VerifyKey _toPublic(Uint8List secret) {
     var pk = Uint8List(TweetNaCl.publicKeyLength);
-    TweetNaClExt.scalar_base(pk, secret.toUint8List());
+    TweetNaClExt.crypto_scalar_base(pk, secret.toUint8List());
     return VerifyKey(pk);
   }
 

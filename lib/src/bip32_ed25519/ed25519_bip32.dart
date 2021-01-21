@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:pinenacl/ed25519.dart';
-import 'package:pinenacl/hashing.dart';
+import 'package:pinenacl/digests.dart';
 import 'package:pinenacl/tweetnacl.dart';
 import 'package:bip32_ed25519/src/bip32_ed25519/ed25519_extended.dart';
 import 'package:bip32_ed25519/api.dart';
@@ -179,9 +179,9 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivaton {
       //_8Zl = 8 * _Zl
       scalar_mul_8(_8Zl, _Z, 28);
       // _8ZlB = 8 * _Zl * B
-      TweetNaClExt.scalar_base(_8ZlB, _8Zl);
+      TweetNaClExt.crypto_scalar_base(_8ZlB, _8Zl);
       // _Ai = _8ZlB + Ap
-      TweetNaClExt.point_add(K, parentKey, _8ZlB);
+      TweetNaClExt.crypto_point_add(K, parentKey, _8ZlB);
 
       return Bip32VerifyKey.fromKeyBytes(K, ci);
     } else {
@@ -271,7 +271,7 @@ class Bip32SigningKey extends ExtendedSigningKey with Bip32PrivateKey {
     var pk = (left + secret.sublist(keyLength - ChainCode.chainCodeLength))
         .toUint8List();
 
-    TweetNaClExt.scalar_base(pk, secret.toUint8List());
+    TweetNaClExt.crypto_scalar_base(pk, secret.toUint8List());
     return Bip32VerifyKey(pk);
   }
 
