@@ -1,5 +1,5 @@
-import 'digital_signatures_benchmark.dart' as digital_signatures_benchmark;
+import 'bip32_ed25519_benchmark.dart' as bip32_ed25519_benchmark;
 
 void main() {
-  digital_signatures_benchmark.main();
+  bip32_ed25519_benchmark.main();
 }
