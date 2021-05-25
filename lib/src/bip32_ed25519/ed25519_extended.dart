@@ -13,7 +13,7 @@ class ExtendedSigningKey extends SigningKey {
   ExtendedSigningKey.fromSeed(Uint8List seed) : this(_seedToSecret(seed));
 
   ExtendedSigningKey.decode(String keyString, {Encoder coder = decoder})
-      : this(coder.decode(keyString));
+      : this(coder.decode(keyString).asTypedList);
 
   ExtendedSigningKey.generate()
       : this.normalizeBytes(PineNaClUtils.randombytes(keyLength));
@@ -51,7 +51,7 @@ class ExtendedSigningKey extends SigningKey {
   VerifyKey? _verifyKey;
 
   @override
-  VerifyKey get verifyKey => _verifyKey ??= _toPublic(this);
+  VerifyKey get verifyKey => _verifyKey ??= _toPublic(this.asTypedList);
 
   @override
   VerifyKey get publicKey => verifyKey;

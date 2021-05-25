@@ -62,15 +62,15 @@ void main() {
       final ed25519e_sk = ExtendedSigningKey.generate();
 
       expect(() => ExtendedSigningKey, returnsNormally);
-      expect(() => ExtendedSigningKey(ed25519e_sk),
+      expect(() => ExtendedSigningKey(ed25519e_sk.asTypedList),
           returnsNormally); // From valid key
 
       expect(() => ExtendedSigningKey.generate(), returnsNormally);
       expect(() => ExtendedSigningKey.fromSeed(_32), returnsNormally);
 
-      expect(() => ExtendedSigningKey.normalizeBytes(_64), returnsNormally);
+      expect(() => ExtendedSigningKey.normalizeBytes(_64.toUint8List()), returnsNormally);
 
-      expect(() => ExtendedSigningKey.fromValidBytes(ed25519e_sk),
+      expect(() => ExtendedSigningKey.fromValidBytes(ed25519e_sk.asTypedList),
           returnsNormally);
 
       expect(() => ExtendedSigningKey.decode(extendedSk), returnsNormally);
@@ -101,18 +101,18 @@ void main() {
       final chainCode = xprv.chainCode;
 
       final pubBytes = HexCoder.instance.decode(publicBytesHex).sublist(0, 32);
-      final xpub = Bip32VerifyKey.fromKeyBytes(pubBytes, chainCode);
+      final xpub = Bip32VerifyKey.fromKeyBytes(pubBytes.asTypedList, chainCode.asTypedList);
 
       assert(xpub == xprv.verifyKey);
 
       expect(() => Bip32SigningKey, returnsNormally);
-      expect(() => Bip32SigningKey(xprv), returnsNormally);
+      expect(() => Bip32SigningKey(xprv.asTypedList), returnsNormally);
 
       expect(() => Bip32SigningKey.generate(), returnsNormally);
 
       expect(() => Bip32SigningKey.normalizeBytes(_96), returnsNormally);
 
-      expect(() => Bip32SigningKey.fromValidBytes(xprv), returnsNormally);
+      expect(() => Bip32SigningKey.fromValidBytes(xprv.asTypedList), returnsNormally);
 
       expect(() => Bip32SigningKey.decode(xPrv, coder: xprvCoder),
           returnsNormally);

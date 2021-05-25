@@ -24,7 +24,7 @@ class Bip32Ed25519 extends Bip32Ed25519KeyDerivation with Bip32KeyTree {
     this.root = master(masterSeed);
   }
   Bip32Ed25519.seed(String seed) {
-    this.root = master(HexCoder.instance.decode(seed));
+    this.root = master(HexCoder.instance.decode(seed).asTypedList);
   }
 
   Bip32Ed25519.import(String key) {
@@ -130,7 +130,7 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivaton {
     final messageBytes =
         [prefix, ...parentKey.keyBytes, ...suffix].toUint8List();
 
-    TweetNaClExt.crypto_auth_hmacsha512(out, messageBytes, parentKey.chainCode);
+    TweetNaClExt.crypto_auth_hmacsha512(out, messageBytes, parentKey.chainCode.asTypedList);
     return out;
   }
 
@@ -162,7 +162,7 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivaton {
   /// It computes the extended public key corresponding to an extended private
   /// key a.k.a the `neutered` version, as it removes the ability to sign transactions.
   ///
-  Bip32PublicKey neuterPriv(Bip32PrivateKey k) => Bip32VerifyKey(k.publicKey);
+  Bip32PublicKey neuterPriv(Bip32PrivateKey k) => Bip32VerifyKey(k.publicKey.asTypedList);
 
   Bip32Key _ckd(Bip32Key parentKey, int index) {
     final ci = _deriveC(parentKey, index);
@@ -181,7 +181,7 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivaton {
       // _8ZlB = 8 * _Zl * B
       TweetNaClExt.crypto_scalar_base(_8ZlB, _8Zl);
       // _Ai = _8ZlB + Ap
-      TweetNaClExt.crypto_point_add(K, parentKey, _8ZlB);
+      TweetNaClExt.crypto_point_add(K, parentKey.asTypedList, _8ZlB);
 
       return Bip32VerifyKey.fromKeyBytes(K, ci);
     } else {
@@ -191,9 +191,9 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivaton {
       // kl for public key generation
       // kR for signatures
       // kl = _8Zl + kpL
-      scalar_add(k, 0, _8Zl, parentKey);
+      scalar_add(k, 0, _8Zl, parentKey.asTypedList);
       // kr = _Zr + kpr mod 2^256
-      scalar_add_modulo_2_256(k, 32, _Z, 32, parentKey, 32);
+      scalar_add_modulo_2_256(k, 32, _Z, 32, parentKey.asTypedList, 32);
 
       final result = Bip32SigningKey.fromKeyBytes(k, ci);
       return result;
@@ -248,7 +248,7 @@ class Bip32SigningKey extends ExtendedSigningKey with Bip32PrivateKey {
       : this.normalizeBytes(validateKeyBits(secretBytes));
 
   Bip32SigningKey.decode(String key, {Encoder coder = decoder})
-      : this(coder.decode(key));
+      : this(coder.decode(key).asTypedList);
 
   Bip32SigningKey.generate()
       : this.normalizeBytes(TweetNaCl.randombytes(keyLength));
@@ -269,8 +269,7 @@ class Bip32SigningKey extends ExtendedSigningKey with Bip32PrivateKey {
 
   static Bip32VerifyKey _toPublic(Uint8List secret) {
     var left = List.filled(TweetNaCl.publicKeyLength, 0);
-    var pk = (left + secret.sublist(keyLength - ChainCode.chainCodeLength))
-        .toUint8List();
+    var pk = (left + secret.toUint8List().sublist(keyLength - ChainCode.chainCodeLength)).toUint8List();
 
     TweetNaClExt.crypto_scalar_base(pk, secret.toUint8List());
     return Bip32VerifyKey(pk);

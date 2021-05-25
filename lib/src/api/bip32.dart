@@ -1,7 +1,7 @@
 part of bip32_ed25519.api;
 
 class ChainCode extends ByteList {
-  ChainCode(Uint8List bytes) : super(bytes, chainCodeLength);
+  ChainCode(ByteList bytes) : super(bytes, chainCodeLength);
   static const int chainCodeLength = 32;
 }
 
