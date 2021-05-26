@@ -35,7 +35,7 @@ void main() {
     final vk1 = sk.verifyKey;
     assert(vk == vk1);
 
-    final messageBytes = 'Nothing more threatening than the truth.'.codeUnits;
+    final messageBytes = Uint8List.fromList('Nothing more threatening than the truth.'.codeUnits);
     final signedMessage = sk.sign(messageBytes);
     assert(vk.verifySignedMessage(signedMessage: signedMessage) == true);
     assert(
@@ -101,7 +101,7 @@ void main() {
       final chainCode = xprv.chainCode;
 
       final pubBytes = HexCoder.instance.decode(publicBytesHex).sublist(0, 32);
-      final xpub = Bip32VerifyKey.fromKeyBytes(pubBytes.asTypedList, chainCode.asTypedList);
+      final xpub = Bip32VerifyKey.fromKeyBytes(pubBytes, chainCode.asTypedList);
 
       assert(xpub == xprv.verifyKey);
 

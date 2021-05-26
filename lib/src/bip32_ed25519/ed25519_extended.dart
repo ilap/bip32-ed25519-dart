@@ -13,11 +13,12 @@ class ExtendedSigningKey extends SigningKey {
   ExtendedSigningKey.fromSeed(Uint8List seed) : this(_seedToSecret(seed));
 
   ExtendedSigningKey.decode(String keyString, {Encoder coder = decoder})
-      : this(coder.decode(keyString).asTypedList);
+      : this(coder.decode(keyString));
 
   ExtendedSigningKey.generate()
       : this.normalizeBytes(PineNaClUtils.randombytes(keyLength));
 
+  /// FIXME: `normalizeBytes` modify the source array/list.
   ExtendedSigningKey.normalizeBytes(Uint8List secretBytes)
       : this.fromValidBytes(clampKey(secretBytes, keyLength),
             keyLength: keyLength);

@@ -24,7 +24,7 @@ class Bip32Ed25519 extends Bip32Ed25519KeyDerivation with Bip32KeyTree {
     this.root = master(masterSeed);
   }
   Bip32Ed25519.seed(String seed) {
-    this.root = master(HexCoder.instance.decode(seed).asTypedList);
+    this.root = master(HexCoder.instance.decode(seed));
   }
 
   Bip32Ed25519.import(String key) {
@@ -248,7 +248,7 @@ class Bip32SigningKey extends ExtendedSigningKey with Bip32PrivateKey {
       : this.normalizeBytes(validateKeyBits(secretBytes));
 
   Bip32SigningKey.decode(String key, {Encoder coder = decoder})
-      : this(coder.decode(key).asTypedList);
+      : this(coder.decode(key));
 
   Bip32SigningKey.generate()
       : this.normalizeBytes(TweetNaCl.randombytes(keyLength));
