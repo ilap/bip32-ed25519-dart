@@ -31,12 +31,14 @@ void main() {
   // The message and the signature can either be passed separately or
   // concatenated together.  These are equivalent:
   verifyKey.verifySignedMessage(signedMessage: signed);
-  verifyKey.verify(signature: signed.signature, message: signed.message.asTypedList);
+  verifyKey.verify(
+      signature: signed.signature, message: signed.message.asTypedList);
 
   try {
     // Forged message.
     verifyKey.verify(
-        signature: signed.signature, message: Uint8List.fromList(forgedMessage.codeUnits));
+        signature: signed.signature,
+        message: Uint8List.fromList(forgedMessage.codeUnits));
   } on Exception catch (e) {
     print('Exception\'s successfully cought:\n$e');
   }

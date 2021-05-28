@@ -42,5 +42,26 @@ void main() {
         idx++;
       });
     });
+
+    test('keytree depth exceeded', () {
+      final exceededKey = Bip32SigningKey.normalizeBytes(Uint8List(96),
+          depth: Bip32Ed25519.maxDepth);
+
+      expect(
+          () => derivator.ckdPriv(exceededKey, idx),
+          throwsA(
+              TypeMatcher<MaxDepthExceededBip23Ed25519DerivationKeyError>()));
+
+      final singingKey = Bip32SigningKey.normalizeBytes(Uint8List(96),
+          depth: Bip32Ed25519.maxDepth - 1);
+
+      final derivedKey = derivator.ckdPriv(singingKey, idx);
+
+      assert(derivedKey.depth == Bip32Ed25519.maxDepth);
+      expect(
+          () => derivator.ckdPriv(derivedKey, idx),
+          throwsA(
+              TypeMatcher<MaxDepthExceededBip23Ed25519DerivationKeyError>()));
+    });
   });
 }

@@ -35,7 +35,8 @@ void main() {
     final vk1 = sk.verifyKey;
     assert(vk == vk1);
 
-    final messageBytes = Uint8List.fromList('Nothing more threatening than the truth.'.codeUnits);
+    final messageBytes = Uint8List.fromList(
+        'Nothing more threatening than the truth.'.codeUnits);
     final signedMessage = sk.sign(messageBytes);
     assert(vk.verifySignedMessage(signedMessage: signedMessage) == true);
     assert(
@@ -68,7 +69,8 @@ void main() {
       expect(() => ExtendedSigningKey.generate(), returnsNormally);
       expect(() => ExtendedSigningKey.fromSeed(_32), returnsNormally);
 
-      expect(() => ExtendedSigningKey.normalizeBytes(_64.toUint8List()), returnsNormally);
+      expect(() => ExtendedSigningKey.normalizeBytes(_64.toUint8List()),
+          returnsNormally);
 
       expect(() => ExtendedSigningKey.fromValidBytes(ed25519e_sk.asTypedList),
           returnsNormally);
@@ -112,7 +114,8 @@ void main() {
 
       expect(() => Bip32SigningKey.normalizeBytes(_96), returnsNormally);
 
-      expect(() => Bip32SigningKey.fromValidBytes(xprv.asTypedList), returnsNormally);
+      expect(() => Bip32SigningKey.fromValidBytes(xprv.asTypedList),
+          returnsNormally);
 
       expect(() => Bip32SigningKey.decode(xPrv, coder: xprvCoder),
           returnsNormally);

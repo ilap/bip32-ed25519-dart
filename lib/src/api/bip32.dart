@@ -11,7 +11,9 @@ mixin Bip32Key on AsymmetricKey {
   Bip32Key derive(int index);
 }
 
-mixin Bip32PrivateKey on AsymmetricPrivateKey implements Bip32Key {}
+mixin Bip32PrivateKey on AsymmetricPrivateKey implements Bip32Key {
+  final int depth = 0;
+}
 
 mixin Bip32PublicKey on AsymmetricPublicKey implements Bip32Key {}
 
@@ -42,6 +44,7 @@ abstract class Bip32ChildKeyDerivaton {
 /// private keys and public keys, and knowing an extended public keys allows
 /// reconstruction of all descendant non-hardened public keys
 /// Source: [BIP-0032](https://en.bitcoin.it/wiki/BIP_0032#The_key_tree)
+///
 abstract class Bip32KeyTree {
   // Bip32KeyTree.seed(String seed) {
   //   this.root = master(HexCoder.instance.decode(seed));
@@ -51,8 +54,6 @@ abstract class Bip32KeyTree {
   //   this.root = doImport(key);
   // }
 
-  // hierarchy dept.
-  static final int maxDepth = 1024;
   late final Bip32Key root;
 
   static const int hardenedIndex = 0x80000000;
@@ -66,9 +67,17 @@ abstract class Bip32KeyTree {
   Bip32Key doImport(String key);
 
   Bip32Key forPath(String path) {
-    _validatePath(path);
+    final kind = path.split('/').removeAt(0);
 
-    final wantsPrivate = path[0] == _privateKeyPrefix;
+    if (![_privateKeyPrefix, _publicKeyPrefix].contains(kind)) {
+      throw Exception("Path needs to start with 'm' or 'M'");
+    }
+
+    if (kind == _privateKeyPrefix && root is Bip32PublicKey) {
+      throw Exception('Cannot derive private key from public master');
+    }
+
+    final wantsPrivate = kind == _privateKeyPrefix;
     final children = _parseChildren(path);
 
     if (children.isEmpty) {
@@ -83,20 +92,8 @@ abstract class Bip32KeyTree {
     });
   }
 
-  void _validatePath(String path) {
-    var kind = path.split('/').removeAt(0);
-
-    if (![_privateKeyPrefix, _publicKeyPrefix].contains(kind)) {
-      throw Exception("Path needs to start with 'm' or 'M'");
-    }
-
-    if (kind == _privateKeyPrefix && root is Bip32PublicKey) {
-      throw Exception('Cannot derive private key from public master');
-    }
-  }
-
-  Iterable<int> _parseChildren(String path) {
-    var explodedList = path.split('/')
+Iterable<int> _parseChildren(String path) {
+    final explodedList = path.split('/')
       ..removeAt(0)
       ..removeWhere((child) => child == '');
 
