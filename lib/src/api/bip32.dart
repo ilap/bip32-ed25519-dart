@@ -46,16 +46,9 @@ abstract class Bip32ChildKeyDerivaton {
 /// Source: [BIP-0032](https://en.bitcoin.it/wiki/BIP_0032#The_key_tree)
 ///
 abstract class Bip32KeyTree {
-  // Bip32KeyTree.seed(String seed) {
-  //   this.root = master(HexCoder.instance.decode(seed));
-  // }
-
-  // Bip32KeyTree.import(String key) {
-  //   this.root = doImport(key);
-  // }
-
   late final Bip32Key root;
 
+  static const int maxIndex = 0xFFFFFFFF;
   static const int hardenedIndex = 0x80000000;
   static const String _hardenedSuffix = "'";
   static const String _privateKeyPrefix = 'm';
@@ -66,7 +59,7 @@ abstract class Bip32KeyTree {
   Bip32Key master(Uint8List seed);
   Bip32Key doImport(String key);
 
-  Bip32Key forPath(String path) {
+  Bip32Key pathToKey(String path) {
     final kind = path.split('/').removeAt(0);
 
     if (![_privateKeyPrefix, _publicKeyPrefix].contains(kind)) {
@@ -92,7 +85,18 @@ abstract class Bip32KeyTree {
     });
   }
 
-Iterable<int> _parseChildren(String path) {
+  static String indexToPathNotation(int index) {
+    // TODO: create proper error class
+    if (index >= maxIndex) {
+      throw Error();
+    }
+
+    return index < hardenedIndex
+        ? index.toString()
+        : '${index - hardenedIndex}\'';
+  }
+
+  Iterable<int> _parseChildren(String path) {
     final explodedList = path.split('/')
       ..removeAt(0)
       ..removeWhere((child) => child == '');

@@ -15,7 +15,7 @@ void main() {
   print('');
   print('Generating account key pair from path $accountPath');
 
-  final accountKey = icarusKeyTree.forPath(accountPath);
+  final accountKey = icarusKeyTree.pathToKey(accountPath);
 
   print(accountKey.encode(Bech32Coder(hrp: 'xprv')));
   print(accountKey.publicKey.encode(Bech32Coder(hrp: 'xpub')));
@@ -37,19 +37,19 @@ void main() {
 
   print('These three public address keys must be the same...\n');
   print('Generating address public key from ${addressPath}');
-  final addressKey = icarusKeyTree.forPath(addressPath);
+  final addressKey = icarusKeyTree.pathToKey(addressPath);
   print(addressKey.publicKey.encode(Bech32Coder(hrp: 'xpub')));
 
   print('');
 
   print('Generating address public key from ${neuteredPath}');
-  final neuteredAddress = neuteredKeyTree.forPath(neuteredPath);
+  final neuteredAddress = neuteredKeyTree.pathToKey(neuteredPath);
   print(neuteredAddress.encode(Bech32Coder(hrp: 'xpub')));
 
   print('');
 
   print('Generating address public key from ${nonNeuteredPath}');
-  final addressKey1 = importedKeyTree.forPath(nonNeuteredPath);
+  final addressKey1 = importedKeyTree.pathToKey(nonNeuteredPath);
   print(addressKey1.publicKey.encode(Bech32Coder(hrp: 'xpub')));
 
   print('');

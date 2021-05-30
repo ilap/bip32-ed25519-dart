@@ -4,7 +4,6 @@ import 'accounts.dart';
 import 'package:bip32_ed25519/api.dart';
 import 'package:bip32_ed25519/bip32_ed25519.dart';
 
-
 class Coin {
   Coin(this.chain, this.index);
 

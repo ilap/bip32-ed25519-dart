@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'package:http/http.dart' as http;
 
-
 class BlockFrost implements Scanner {
   BlockFrost(this.url);
   BlockFrost.withDefaultUrl() : url = BlockFrost.defaultUrl;
 
-  static const String defaultUrl = 'https://cardano-testnet.blockfrost.io/api/v0';
+  static const String defaultUrl =
+      'https://cardano-testnet.blockfrost.io/api/v0';
   static const Map<String, String> defaultHeaders = {
     'User-Agent': 'Dart bip32_ed25519_dart library',
     'project_id': 'RPblrxHyjYYqLVPtSNcvPwp3S2DWGAfG'
@@ -24,9 +24,7 @@ class BlockFrost implements Scanner {
   }
 }
 
-List<Scanner> scanners = [
-  BlockFrost.withDefaultUrl()
-];
+List<Scanner> scanners = [BlockFrost.withDefaultUrl()];
 
 abstract class Scanner {
   Future<bool> present(String address);
