@@ -89,7 +89,7 @@ abstract class ShelleyAddress extends ByteList {
       // Enterprise Address
       case 6:
       case 7:
-        if (bytes.length != 1 + Hash.defaultHashLength) {
+        if (bytes.length != 1 + CredentialHash28.hashLength) {
           // FIXME: Create proper error classes
           throw Error();
         }
@@ -99,7 +99,7 @@ abstract class ShelleyAddress extends ByteList {
       // Stake (chmeric) Address
       case 14:
       case 15:
-        if (bytes.length != 1 + Hash.defaultHashLength) {
+        if (bytes.length != 1 + CredentialHash28.hashLength) {
           // FIXME: Create proper error classes
           throw Error();
         }
@@ -168,19 +168,19 @@ class BaseAddress extends ShelleyAddress {
 class EnterpriseAddress extends ShelleyAddress {
   EnterpriseAddress(NetworkId networkId, CredentialHash28 bytes)
       : super(networkId,
-            ShelleyAddress._computeBytes(networkId, AddressType.Base, bytes));
+            ShelleyAddress._computeBytes(networkId, AddressType.Enterprise, bytes));
 }
 
 class PointerAddress extends ShelleyAddress {
   PointerAddress(NetworkId networkId, CredentialHash28 bytes)
       : super(networkId,
-            ShelleyAddress._computeBytes(networkId, AddressType.Base, bytes));
+            ShelleyAddress._computeBytes(networkId, AddressType.Pointer, bytes));
 }
 
 class RewardAddress extends ShelleyAddress {
   RewardAddress(NetworkId networkId, CredentialHash28 bytes)
       : super(networkId,
-            ShelleyAddress._computeBytes(networkId, AddressType.Base, bytes));
+            ShelleyAddress._computeBytes(networkId, AddressType.Reward, bytes));
 }
 
 void main() {
