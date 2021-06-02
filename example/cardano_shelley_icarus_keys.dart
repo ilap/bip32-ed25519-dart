@@ -9,7 +9,7 @@ void main() {
   const nonNeuteredPath = 'm/0/0';
   print('Generating Icarus master key from seed: $seed');
 
-  final icarusKeyTree = CardanoKeyIcarus.seed(seed);
+  final icarusKeyTree = CardanoIcarusKey.seed(seed);
 
   print(icarusKeyTree.root.encode(Bech32Coder(hrp: 'xprv')));
   print('');
@@ -22,7 +22,7 @@ void main() {
   print('');
 
   print('Importing account key to a KeyTree: $accountPath -> m/');
-  final importedKeyTree = CardanoKeyIcarus.import(accountKey.encode());
+  final importedKeyTree = CardanoIcarusKey.import(accountKey.encode());
 
   print('Importing account\'s public to a KeyTree: M/');
   // It could be imported straight from the public key
@@ -30,7 +30,7 @@ void main() {
   final neutered =
       icarusKeyTree.neuterPriv(importedKeyTree.root as Bip32PrivateKey);
 
-  final neuteredKeyTree = CardanoKeyIcarus.import(neutered.encode());
+  final neuteredKeyTree = CardanoIcarusKey.import(neutered.encode());
 
   print(neuteredKeyTree.root.encode(Bech32Coder(hrp: 'xpub')));
   print('');
