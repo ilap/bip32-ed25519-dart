@@ -85,10 +85,10 @@ abstract class ShelleyAddress extends ByteList {
       case 4:
       case 5:
         var byteIndex = 1 + CredentialHash.hashLength;
-        final paymentCred =
-            _getCredentialType(header, bytes.getRange(1, byteIndex).toList(), bit: 4);
+        final paymentCred = _getCredentialType(
+            header, bytes.getRange(1, byteIndex).toList(),
+            bit: 4);
 
-        
         final slotTuple = ChainPointer.decode(bytes.skip(byteIndex).toList());
 
         byteIndex += slotTuple.readedBytes;
@@ -97,8 +97,9 @@ abstract class ShelleyAddress extends ByteList {
         byteIndex += txTuple.readedBytes;
         final certTuple = ChainPointer.decode(bytes.skip(byteIndex).toList());
 
-        if ( byteIndex + certTuple.readedBytes < bytes.length) {
-          throw Exception('Fixme - throw error in address encoding/decoding instead!');
+        if (byteIndex + certTuple.readedBytes < bytes.length) {
+          throw Exception(
+              'Fixme - throw error in address encoding/decoding instead!');
         }
         return PointerAddress(
             networkId,
@@ -107,7 +108,6 @@ abstract class ShelleyAddress extends ByteList {
                 slot: slotTuple.number,
                 txIndex: txTuple.number,
                 certIndex: certTuple.number));
-
 
       // Enterprise Address
       case 6:
@@ -147,8 +147,8 @@ abstract class ShelleyAddress extends ByteList {
     }
   }
 
-  static List<int> _computeBytes(NetworkId networkId, AddressType addressType,
-      CredentialHash paymentBytes,
+  static List<int> _computeBytes(
+      NetworkId networkId, AddressType addressType, CredentialHash paymentBytes,
       {CredentialHash? stakeBytes}) {
     switch (addressType) {
       case AddressType.Base:
@@ -164,8 +164,8 @@ abstract class ShelleyAddress extends ByteList {
             0x60 | (networkId.index & 0x0f) | (paymentBytes.kind << 4);
         return [header] + paymentBytes;
       case AddressType.Pointer:
-        final header = 
-            0x40 |  (networkId.index & 0x0f) | (paymentBytes.kind << 4);
+        final header =
+            0x40 | (networkId.index & 0x0f) | (paymentBytes.kind << 4);
         return [header] + paymentBytes;
       case AddressType.Reward:
         final header =
@@ -198,21 +198,20 @@ class EnterpriseAddress extends ShelleyAddress {
 }
 
 class PointerAddress extends ShelleyAddress {
-  PointerAddress(NetworkId networkId, CredentialHash hashBytes, ChainPointer chainPointer)
+  PointerAddress(
+      NetworkId networkId, CredentialHash hashBytes, ChainPointer chainPointer)
       : super(
             networkId,
             ShelleyAddress._computeBytes(
-                networkId, AddressType.Pointer, hashBytes)
-        + _encodePointer(chainPointer));
-  
+                    networkId, AddressType.Pointer, hashBytes) +
+                _encodePointer(chainPointer));
+
   static List<int> _encodePointer(ChainPointer pointer) {
-    
     var result = ChainPointer.encode(pointer.slot);
     result += ChainPointer.encode(pointer.txIndex);
     result += ChainPointer.encode(pointer.certIndex);
 
     return result;
-
   }
 }
 
@@ -235,13 +234,19 @@ class ChainPointer {
   final int txIndex;
   final int certIndex;
 
+  ///
+  /// For 32-bit architecture it's a 2^32-1 big number
+  /// which last for 68 years for slots. We also can assume that 32-bit
+  /// arch won't really exist in that time.
+  /// TODO: Make it ready for slots bigger than 2^32-1
+  ///
   static List<int> encode(int number) {
     final result = List<int>.filled(1, number & 0x7f, growable: true);
 
-    number >>= 128;
+    number >>= 7;
     while (number > 0) {
-      result.insert(0, number & 0x7f | 0x80);
-      number >>= 128;
+      result.insert(0, (number & 0x7f) | 0x80);
+      number >>= 7;
     }
     return result;
   }
@@ -249,9 +254,11 @@ class ChainPointer {
   static PointerTuple decode(List<int> bytes) {
     var result = 0;
     var bytesReaded = 0;
+
     for (final byte in bytes) {
       result = (result << 7) | (byte & 0x7f);
       bytesReaded += 1;
+
       if ((byte & 0x80) == 0) {
         return PointerTuple(result, bytesReaded);
       }
@@ -306,11 +313,22 @@ void main() {
 
   // Test Base128
 
-  final encoded = ChainPointer.encode(127);
+  final stakeCred =
+      KeyHash(List<int>.generate(CredentialHash.hashLength, (index) => index));
+  final ptrAddress = PointerAddress(NetworkId.testnet, stakeCred,
+      ChainPointer(slot: 2354556573, txIndex: 127, certIndex: 0));
+
+  // It must be casted to be equal.
+  final addr2 = ShelleyAddress.fromBytes(ptrAddress);
+
+  assert(ptrAddress == addr2);
+  print(ptrAddress == addr2);
+
+  final encoded = ChainPointer.encode(256275757658493284);
   final decoded = ChainPointer.decode(encoded).number;
   print(decoded);
 
-  address = ShelleyAddress.fromBech32('addr1gyy6nhfyks7wdu3dudslys37v252w2nwhv0fw2nfawemmnyph3wczvf2dqflgt');
+  address = ShelleyAddress.fromBech32(
+      'addr1gyy6nhfyks7wdu3dudslys37v252w2nwhv0fw2nfawemmnyph3wczvf2dqflgt');
   print(address.toBech32());
-
 }
