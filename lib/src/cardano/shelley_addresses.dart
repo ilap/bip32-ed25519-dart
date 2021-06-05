@@ -2,51 +2,52 @@ import 'package:bip32_ed25519/api.dart';
 import 'package:bip32_ed25519/cardano.dart';
 import 'package:pinenacl/digests.dart';
 
-///
-/// Address format
-///
+/// Byron type is not supported.
 enum AddressType { Base, Pointer, Enterprise, Reward }
+
+/// Credential types.
 enum CredentialType { Key, Script }
 
 /// We do not consider Byron's protocol magic
-enum NetworkId { testnet, mainnet }
+enum NetworkTag { testnet, mainnet }
 
 abstract class CredentialHash extends ByteList {
-  int get kind;
-  static const hashLength = 28;
-  CredentialHash(List<int> bytes) : super(bytes, hashLength);
+  CredentialHash(List<int> bytes) : super(bytes, defaultHashLength);
+
+  CredentialType get kind;
+  static const defaultHashLength = 28;
 }
 
 class KeyHash extends CredentialHash {
   KeyHash(List<int> bytes) : super(bytes);
 
   @override
-  int get kind => CredentialType.Key.index;
+  CredentialType get kind => CredentialType.Key;
 }
 
 class ScriptHash extends CredentialHash {
   ScriptHash(List<int> bytes) : super(bytes);
 
   @override
-  int get kind => CredentialType.Key.index;
+  CredentialType get kind => CredentialType.Script;
 }
 
 abstract class ShelleyAddress extends ByteList {
   static const defaultPrefix = 'addr';
   static const defaultTail = '_test';
 
-  final NetworkId networkId;
+  final NetworkTag networkTag;
 
-  ShelleyAddress(this.networkId, List<int> bytes) : super(bytes);
+  ShelleyAddress(this.networkTag, List<int> bytes) : super(bytes);
 
-  static String _computeHrp(NetworkId id, String prefix) {
-    return id == NetworkId.testnet
+  static String _computeHrp(NetworkTag id, String prefix) {
+    return id == NetworkTag.testnet
         ? prefix + ShelleyAddress.defaultTail
         : prefix;
   }
 
   String toBech32({String? prefix}) {
-    prefix ??= _computeHrp(networkId, defaultPrefix);
+    prefix ??= _computeHrp(networkTag, defaultPrefix);
 
     return this.encode(Bech32Coder(hrp: prefix));
   }
@@ -61,7 +62,7 @@ abstract class ShelleyAddress extends ByteList {
 
   static ShelleyAddress fromBytes(List<int> bytes) {
     final header = bytes[0];
-    final networkId = NetworkId.values[header & 0x0f];
+    final networkTag = NetworkTag.values[header & 0x0f];
 
     final addrType = (header & 0xf0) >> 4;
     switch (addrType) {
@@ -70,21 +71,21 @@ abstract class ShelleyAddress extends ByteList {
       case 1:
       case 2:
       case 3:
-        if (bytes.length != 1 + CredentialHash.hashLength * 2) {
+        if (bytes.length != 1 + CredentialHash.defaultHashLength * 2) {
           // FIXME: Create proper error classes
           throw Error();
         }
         return BaseAddress(
-            networkId,
+            networkTag,
             _getCredentialType(header, bytes.getRange(1, 29).toList(), bit: 4),
             _getCredentialType(
-                header, bytes.skip(1 + CredentialHash.hashLength).toList(),
+                header, bytes.skip(1 + CredentialHash.defaultHashLength).toList(),
                 bit: 5));
 
       // Pointer Address
       case 4:
       case 5:
-        var byteIndex = 1 + CredentialHash.hashLength;
+        var byteIndex = 1 + CredentialHash.defaultHashLength;
         final paymentCred = _getCredentialType(
             header, bytes.getRange(1, byteIndex).toList(),
             bit: 4);
@@ -102,7 +103,7 @@ abstract class ShelleyAddress extends ByteList {
               'Fixme - throw error in address encoding/decoding instead!');
         }
         return PointerAddress(
-            networkId,
+            networkTag,
             paymentCred,
             ChainPointer(
                 slot: slotTuple.number,
@@ -112,28 +113,26 @@ abstract class ShelleyAddress extends ByteList {
       // Enterprise Address
       case 6:
       case 7:
-        if (bytes.length != 1 + CredentialHash.hashLength) {
+        if (bytes.length != 1 + CredentialHash.defaultHashLength) {
           // FIXME: Create proper error classes
           throw Error();
         }
-        return EnterpriseAddress(networkId,
+        return EnterpriseAddress(networkTag,
             _getCredentialType(header, bytes.skip(1).toList(), bit: 4));
 
       // Stake (chmeric) Address
       case 14:
       case 15:
-        if (bytes.length != 1 + CredentialHash.hashLength) {
+        if (bytes.length != 1 + CredentialHash.defaultHashLength) {
           // FIXME: Create proper error classes
           throw Error();
         }
-        return RewardAddress(networkId,
+        return RewardAddress(networkTag,
             _getCredentialType(header, bytes.skip(1).toList(), bit: 4));
 
       default:
         throw Exception('Unsupported Cardano Address, type: ${header}');
     }
-
-    throw Error();
   }
 
   /// If the nth bit is 0 that means it's a key hash, otherwise it's script hash.
@@ -148,28 +147,28 @@ abstract class ShelleyAddress extends ByteList {
   }
 
   static List<int> _computeBytes(
-      NetworkId networkId, AddressType addressType, CredentialHash paymentBytes,
+      NetworkTag networkTag, AddressType addressType, CredentialHash paymentBytes,
       {CredentialHash? stakeBytes}) {
     switch (addressType) {
       case AddressType.Base:
         if (stakeBytes == null) {
           throw Exception('Base address requires Stake credential');
         }
-        final header = (networkId.index & 0x0f) |
-            (paymentBytes.kind << 4) |
-            (stakeBytes.kind << 5);
+        final header = (networkTag.index & 0x0f) |
+            (paymentBytes.kind.index << 4) |
+            (stakeBytes.kind.index << 5);
         return [header] + paymentBytes + stakeBytes;
       case AddressType.Enterprise:
         final header =
-            0x60 | (networkId.index & 0x0f) | (paymentBytes.kind << 4);
+            0x60 | (networkTag.index & 0x0f) | (paymentBytes.kind.index << 4);
         return [header] + paymentBytes;
       case AddressType.Pointer:
         final header =
-            0x40 | (networkId.index & 0x0f) | (paymentBytes.kind << 4);
+            0x40 | (networkTag.index & 0x0f) | (paymentBytes.kind.index << 4);
         return [header] + paymentBytes;
       case AddressType.Reward:
         final header =
-            0xe0 | (networkId.index & 0x0f) | (paymentBytes.kind << 4);
+            0xe0 | (networkTag.index & 0x0f) | (paymentBytes.kind.index << 4);
         return [header] + paymentBytes;
       default:
         throw Exception('Unsupported address header');
@@ -179,31 +178,31 @@ abstract class ShelleyAddress extends ByteList {
 
 class BaseAddress extends ShelleyAddress {
   BaseAddress(
-    NetworkId networkId,
+    NetworkTag networkTag,
     CredentialHash paymentBytes,
     CredentialHash stakeBytes,
   ) : super(
-            networkId,
+            networkTag,
             ShelleyAddress._computeBytes(
-                networkId, AddressType.Base, paymentBytes,
+                networkTag, AddressType.Base, paymentBytes,
                 stakeBytes: stakeBytes));
 }
 
 class EnterpriseAddress extends ShelleyAddress {
-  EnterpriseAddress(NetworkId networkId, CredentialHash hashBytes)
+  EnterpriseAddress(NetworkTag networkTag, CredentialHash hashBytes)
       : super(
-            networkId,
+            networkTag,
             ShelleyAddress._computeBytes(
-                networkId, AddressType.Enterprise, hashBytes));
+                networkTag, AddressType.Enterprise, hashBytes));
 }
 
 class PointerAddress extends ShelleyAddress {
   PointerAddress(
-      NetworkId networkId, CredentialHash hashBytes, ChainPointer chainPointer)
+      NetworkTag networkTag, CredentialHash hashBytes, ChainPointer chainPointer)
       : super(
-            networkId,
+            networkTag,
             ShelleyAddress._computeBytes(
-                    networkId, AddressType.Pointer, hashBytes) +
+                    networkTag, AddressType.Pointer, hashBytes) +
                 _encodePointer(chainPointer));
 
   static List<int> _encodePointer(ChainPointer pointer) {
@@ -269,11 +268,11 @@ class ChainPointer {
 }
 
 class RewardAddress extends ShelleyAddress {
-  RewardAddress(NetworkId networkId, CredentialHash hashBytes)
+  RewardAddress(NetworkTag networkTag, CredentialHash hashBytes)
       : super(
-            networkId,
+            networkTag,
             ShelleyAddress._computeBytes(
-                networkId, AddressType.Reward, hashBytes));
+                networkTag, AddressType.Reward, hashBytes));
 }
 
 void main() {
@@ -287,35 +286,25 @@ void main() {
   final addressKey = icarusKeyTree.pathToKey(addressPath);
   final rewardKey = icarusKeyTree.pathToKey(rewardAddressPath);
 
-  var address = ShelleyAddress.fromBech32(
-      'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp');
-  print(address.toBech32());
+  final addresses = [
+    'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp',
+    'addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwqfjkjv7',
+    'addr_test1vz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzerspjrlsz',
+    'addr1vx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzers66hrl8',
+    'addr_test1qpu5vlrf4xkxv2qpwngf6cjhtw542ayty80v8dyr49rf5ewvxwdrt70qlcpeeagscasafhffqsxy36t90ldv06wqrk2qum8x5w',
+    'addr1q9u5vlrf4xkxv2qpwngf6cjhtw542ayty80v8dyr49rf5ewvxwdrt70qlcpeeagscasafhffqsxy36t90ldv06wqrk2qld6xc3',
+    'addr1gyy6nhfyks7wdu3dudslys37v252w2nwhv0fw2nfawemmnyph3wczvf2dqflgt'
+  ];
 
-  address = ShelleyAddress.fromBech32(
-      'addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwqfjkjv7');
-  print(address.toBech32());
-
-  address = ShelleyAddress.fromBech32(
-      'addr_test1vz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzerspjrlsz');
-  print(address.toBech32());
-
-  address = ShelleyAddress.fromBech32(
-      'addr1vx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzers66hrl8');
-  print(address.toBech32());
-
-  address = ShelleyAddress.fromBech32(
-      'addr_test1qpu5vlrf4xkxv2qpwngf6cjhtw542ayty80v8dyr49rf5ewvxwdrt70qlcpeeagscasafhffqsxy36t90ldv06wqrk2qum8x5w');
-  print(address.toBech32());
-
-  address = ShelleyAddress.fromBech32(
-      'addr1q9u5vlrf4xkxv2qpwngf6cjhtw542ayty80v8dyr49rf5ewvxwdrt70qlcpeeagscasafhffqsxy36t90ldv06wqrk2qld6xc3');
-  print(address.toBech32());
-
+  for (final address in addresses) {
+    final decoded = ShelleyAddress.fromBech32(address);
+    assert(decoded.toBech32() == address);
+  }
   // Test Base128
 
   final stakeCred =
-      KeyHash(List<int>.generate(CredentialHash.hashLength, (index) => index));
-  final ptrAddress = PointerAddress(NetworkId.testnet, stakeCred,
+      KeyHash(List<int>.generate(CredentialHash.defaultHashLength, (index) => index));
+  final ptrAddress = PointerAddress(NetworkTag.testnet, stakeCred,
       ChainPointer(slot: 2354556573, txIndex: 127, certIndex: 0));
 
   // It must be casted to be equal.
@@ -328,7 +317,7 @@ void main() {
   final decoded = ChainPointer.decode(encoded).number;
   print(decoded);
 
-  address = ShelleyAddress.fromBech32(
+  final address = ShelleyAddress.fromBech32(
       'addr1gyy6nhfyks7wdu3dudslys37v252w2nwhv0fw2nfawemmnyph3wczvf2dqflgt');
   print(address.toBech32());
 }
