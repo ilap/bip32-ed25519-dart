@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:test/test.dart';
 import 'package:bip32_ed25519/api.dart';
-import 'package:bip32_ed25519/cardano.dart';
 
 void main() {
   const xprvCoder = Bech32Coder(hrp: 'xprv');

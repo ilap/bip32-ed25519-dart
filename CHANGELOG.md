@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.3.0
+
+API Breaking changes.
+Removed Cardano dependencies
+- Cip1852
+- Cip1854
+- Cardano masterkey generation implementations
+
 ## v0.2.0
 
 API Breaking changes
