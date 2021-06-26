@@ -9,6 +9,7 @@ mixin Bip32Key on AsymmetricKey {
   ChainCode get chainCode;
   ByteList get rawKey;
   Bip32Key derive(int index);
+  Bip32PublicKey get neutered;
 }
 
 mixin Bip32PrivateKey on AsymmetricPrivateKey implements Bip32Key {

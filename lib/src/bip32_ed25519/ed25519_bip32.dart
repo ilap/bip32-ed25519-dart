@@ -30,8 +30,12 @@ class Bip32Ed25519 extends Bip32Ed25519KeyDerivation with Bip32KeyTree {
     this.root = master(HexCoder.instance.decode(seed));
   }
 
-  Bip32Ed25519.import(String key) {
-    this.root = doImport(key);
+  Bip32Ed25519.import(String keyString) {
+    this.root = doImport(keyString);
+  }
+
+  Bip32Ed25519.importFromKey(Bip32Key key) {
+    this.root = key;
   }
 
   /// BIP32-ED25519 dependent tree depth.
@@ -246,6 +250,9 @@ class Bip32VerifyKey extends VerifyKey with Bip32PublicKey {
   ChainCode get chainCode => _chainCode;
 
   @override
+  Bip32VerifyKey get neutered => this;
+
+  @override
   Bip32VerifyKey derive(index) {
     return Bip32Ed25519KeyDerivation.instance.ckdPub(this, index)
         as Bip32VerifyKey;
@@ -329,6 +336,10 @@ class Bip32SigningKey extends ExtendedSigningKey with Bip32PrivateKey {
 
   @override
   Bip32VerifyKey get publicKey => verifyKey;
+
+  @override
+  Bip32VerifyKey get neutered =>
+      Bip32Ed25519KeyDerivation.instance.neuterPriv(this) as Bip32VerifyKey;
 
   @override
   Bip32SigningKey derive(index) {
