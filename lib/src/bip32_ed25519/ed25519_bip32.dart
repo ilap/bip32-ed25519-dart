@@ -147,11 +147,11 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivaton {
   // Z is a 64-byte long sequence.
   // Zl the left 32 bytes, is used for generating the private key part of the
   // extended key, while Zr the righ 32 bytes is used for signatures.
-  Uint8List _deriveZ(Bip32Key parentKey, int index) =>
+  static Uint8List _deriveZ(Bip32Key parentKey, int index) =>
       _derive(parentKey, [0x00, 0x02], index);
 
   // ChainCode is the right 32-byte sequence
-  Uint8List _deriveC(Bip32Key parentKey, int index) =>
+  static Uint8List _deriveC(Bip32Key parentKey, int index) =>
       _derive(parentKey, [0x01, 0x03], index).sublist(32);
 
   /// Public parent key to public child key
@@ -175,7 +175,7 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivaton {
   Bip32PublicKey neuterPriv(Bip32PrivateKey k) =>
       Bip32VerifyKey(k.publicKey.asTypedList);
 
-  Bip32Key _ckd(Bip32Key parentKey, int index) {
+  static Bip32Key _ckd(Bip32Key parentKey, int index) {
     final ci = _deriveC(parentKey, index);
     final _Z = _deriveZ(parentKey, index);
 

@@ -34,8 +34,8 @@ void main() {
         final k = Bip32SigningKey.decode(xprv, coder: xprvCoder);
         final K = Bip32VerifyKey.decode(xpub, coder: xpubCoder);
 
-        final derivedPrv = derivator.ckdPriv(chainPrv, idx);
-        final derivedPub = derivator.ckdPub(chainPub, idx);
+        final derivedPrv = chainPrv.derive(idx);
+        final derivedPub = chainPub.derive(idx);
         assert(k == derivedPrv);
         assert(K == derivedPub);
         idx++;
@@ -47,18 +47,18 @@ void main() {
           depth: Bip32Ed25519.maxDepth);
 
       expect(
-          () => derivator.ckdPriv(exceededKey, idx),
+          () => exceededKey.derive(idx),
           throwsA(
               TypeMatcher<MaxDepthExceededBip23Ed25519DerivationKeyError>()));
 
       final singingKey = Bip32SigningKey.normalizeBytes(Uint8List(96),
           depth: Bip32Ed25519.maxDepth - 1);
 
-      final derivedKey = derivator.ckdPriv(singingKey, idx);
+      final derivedKey = singingKey.derive(idx);
 
       assert(derivedKey.depth == Bip32Ed25519.maxDepth);
       expect(
-          () => derivator.ckdPriv(derivedKey, idx),
+          () => derivedKey.derive(idx),
           throwsA(
               TypeMatcher<MaxDepthExceededBip23Ed25519DerivationKeyError>()));
     });
