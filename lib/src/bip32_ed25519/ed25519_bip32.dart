@@ -19,21 +19,47 @@ class InvalidBip32Ed25519MasterSecretException implements Exception {}
 
 ///
 /// This is the dart implementation of the `BIP32-Ed25519 Hierarchical
-/// Deterministic Keys over a Non-linear Keyspace` key derivation
-/// algorythm.
-///
+/// Deterministic Keys over a Non-linear Key space` key derivation
+/// algorithm.
 class Bip32Ed25519 extends Bip32Ed25519KeyDerivation with Bip32KeyTree {
+  /// It creates a BIP32-ED25519 specific key tree from a master seed.
+  /// The master seed is an `n-bit` entropy, that can come from different
+  /// sources. E.g. From some `bip-0039` tool, `CPRNG` etc.
+  ///
+  /// The root of the tree is a valid BIP32-ED25519 `master key`.
   Bip32Ed25519(Uint8List masterSeed) {
     this.root = master(masterSeed);
   }
-  Bip32Ed25519.seed(String seed) {
-    this.root = master(HexCoder.instance.decode(seed));
+
+  /// It creates a BIP32-ED25519 specific key tree from a hex string representation
+  /// of the master seed, which is a hex string representation of an `n-bit` length entropy,
+  /// that can come from different sources. E.g. From some `bip-0039` tool, `CPRNG` etc.
+  ///
+  /// The root of the tree is a valid BIP32-ED25519 `master key`.
+  Bip32Ed25519.seed(String masterSeedHex) {
+    this.root = master(HexCoder.instance.decode(masterSeedHex));
   }
 
-  Bip32Ed25519.import(String keyString) {
-    this.root = doImport(keyString);
+  /// It creates a sub key tree from a, usually `Bech32`, decoded,
+  /// `Bip32-Ed25519` compatible private or public key.
+  ///
+  /// It can be used for creating read-, watch-only HD wallets.
+  ///
+  /// The imported key becomes the root node of the sub tree.
+  /// The root of the tree, usually, is **NOT** a `BIP32-ED25519` master key,
+  /// but a valid `BIP-ED25519` compatible signing and verifying key.
+  Bip32Ed25519.import(String encodedKey) {
+    this.root = doImport(encodedKey);
   }
 
+  /// It creates a sub key tree from an imported `BIP-ED25519` compatible
+  /// private/signing or public/verifying key.
+  ///
+  /// It can be used for creating read-, watch-only HD wallets.
+  ///
+  /// The imported key becomes the root node of the sub tree.
+  /// The root of the tree, usually, is **NOT** a `BIP32-ED25519` master key,
+  /// but a valid `BIP-ED25519` compatible signing and verifying key.
   Bip32Ed25519.importFromKey(Bip32Key key) {
     this.root = key;
   }
@@ -44,7 +70,7 @@ class Bip32Ed25519 extends Bip32Ed25519KeyDerivation with Bip32KeyTree {
   /// FIXME: BIP32-ED25519 specific depth check
   static final int maxDepth = 1048576 - 1;
 
-  /// The default implementation of the origianl BIP32-ED25519's master key
+  /// The default implementation of the original BIP32-ED25519's master key
   /// generation.
   Bip32Key master(Uint8List masterSecret) {
     final secretBytes = Hash.sha512(masterSecret);
@@ -73,7 +99,7 @@ class Bip32Ed25519 extends Bip32Ed25519KeyDerivation with Bip32KeyTree {
   }
 }
 
-class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivaton {
+class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivation {
   const Bip32Ed25519KeyDerivation() : this._singleton();
   const Bip32Ed25519KeyDerivation._singleton();
 

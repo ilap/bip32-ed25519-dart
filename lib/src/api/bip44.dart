@@ -4,7 +4,7 @@ part of bip32_ed25519.api;
 /// `m / purpose' / coin_type' / account' / change / address_index`
 /// Reference: [BIP-0044](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki)
 ///
-abstract class Bip44KeyTree extends Bip43KeyTree {
+abstract class Bip44KeyTree implements Bip43KeyTree {
   /// Purpose, defaults to Bip44 i.e. 44'
   @override
   final int purpose = Bip32KeyTree.hardenedIndex | 44;

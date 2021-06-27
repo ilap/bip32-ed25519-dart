@@ -18,9 +18,7 @@ mixin Bip32PrivateKey on AsymmetricPrivateKey implements Bip32Key {
 
 mixin Bip32PublicKey on AsymmetricPublicKey implements Bip32Key {}
 
-mixin Bip32 implements Bip32ChildKeyDerivaton, Bip32KeyTree {}
-
-abstract class Bip32ChildKeyDerivaton {
+abstract class Bip32ChildKeyDerivation {
   /// Private parent key to private child key
   Bip32PrivateKey ckdPriv(Bip32PrivateKey parentSecret, int index);
 
@@ -31,7 +29,7 @@ abstract class Bip32ChildKeyDerivaton {
   Bip32PublicKey neuterPriv(Bip32PrivateKey parentSecret);
 
   /// Public parent key to private child key
-  /// It is imposibble
+  /// It is impossible
 
 }
 
@@ -46,7 +44,7 @@ abstract class Bip32ChildKeyDerivaton {
 /// reconstruction of all descendant non-hardened public keys
 /// Source: [BIP-0032](https://en.bitcoin.it/wiki/BIP_0032#The_key_tree)
 ///
-abstract class Bip32KeyTree {
+abstract class Bip32KeyTree implements Bip32ChildKeyDerivation {
   late final Bip32Key root;
 
   static const int maxIndex = 0xFFFFFFFF;

@@ -19,7 +19,6 @@ void main() {
     final dynamic ck = yoroi['chain_prv']! as String;
     final dynamic cK = yoroi['chain_pub']! as String;
 
-    final derivator = Bip32Ed25519KeyDerivation.instance;
     final chainPrv = Bip32SigningKey.decode(ck, coder: xprvCoder);
     final chainPub = Bip32VerifyKey.decode(cK, coder: xpubCoder);
 
