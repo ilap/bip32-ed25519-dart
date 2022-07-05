@@ -1,0 +1,24 @@
+name: Dart Test CI
+
+on:
+  push:
+    branches:
+      - master
+      - releases/*
+jobs:
+  stable-channel:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      fail-fast: false
+      matrix:
+        operating-system: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+    - name: Setup Dart VM
+      uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
+    - uses: actions/checkout@v1
+    - name: Install dependencies
+      run: dart pub get
+    - name: Analyze project source
+      run: dart analyze
+    - name: Run tests
+      run: dart test
