@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:bip32_ed25519/cardano.dart';
 
 import 'coin.dart';

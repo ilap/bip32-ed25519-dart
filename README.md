@@ -1,4 +1,10 @@
 # bip32-ed25519-dart
+
+[![Pub Version (stable)](https://img.shields.io/pub/v/bip32_ed25519?color=important&label=pub%20stable&logo=dart)](https://pub.dartlang.org/packages/bip32_ed25519)
+[![Pub Version (including pre-releases)](https://img.shields.io/pub/v/bip32_ed25519?color=blueviolet&label=pub%20prerelease&include_prereleases&logo=dart)](https://pub.dartlang.org/packages/bip32_ed25519)
+
+[![Dart Test CI](https://github.com/ilap/bip32-ed25519-dart/actions/workflows/dart.yml/badge.svg)](https://github.com/ilap/bip32-ed25519-dart/actions/workflows/dart.yml)
+
 The Dart implementation of the BIP32-Ed25519 the deterministic key generation scheme for Edward25519 curve
 # API Interfaces
 

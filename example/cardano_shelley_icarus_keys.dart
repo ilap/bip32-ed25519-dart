@@ -1,3 +1,5 @@
+// ignore_for_file: unrelated_type_equality_checks
+
 import 'package:bip32_ed25519/cardano.dart';
 
 void main() {
@@ -36,19 +38,19 @@ void main() {
   print('');
 
   print('These three public address keys must be the same...\n');
-  print('Generating address public key from ${addressPath}');
+  print('Generating address public key from $addressPath');
   final addressKey = icarusKeyTree.pathToKey(addressPath);
   print(addressKey.publicKey.encode(Bech32Coder(hrp: 'xpub')));
 
   print('');
 
-  print('Generating address public key from ${neuteredPath}');
+  print('Generating address public key from $neuteredPath');
   final neuteredAddress = neuteredKeyTree.pathToKey(neuteredPath);
   print(neuteredAddress.encode(Bech32Coder(hrp: 'xpub')));
 
   print('');
 
-  print('Generating address public key from ${nonNeuteredPath}');
+  print('Generating address public key from $nonNeuteredPath');
   final addressKey1 = importedKeyTree.pathToKey(nonNeuteredPath);
   print(addressKey1.publicKey.encode(Bech32Coder(hrp: 'xpub')));
 

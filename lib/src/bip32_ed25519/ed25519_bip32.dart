@@ -1,11 +1,8 @@
-import 'dart:typed_data';
-
-import 'package:bip32_ed25519/bip32_ed25519.dart';
-import 'package:pinenacl/ed25519.dart';
 import 'package:pinenacl/digests.dart';
 import 'package:pinenacl/tweetnacl.dart';
-import 'package:bip32_ed25519/src/bip32_ed25519/ed25519_extended.dart';
+
 import 'package:bip32_ed25519/api.dart';
+import 'package:bip32_ed25519/bip32_ed25519.dart';
 
 // Errors
 class InvalidBip23Ed25519DerivationKeyError extends Error {}
@@ -28,7 +25,7 @@ class Bip32Ed25519 extends Bip32Ed25519KeyDerivation with Bip32KeyTree {
   ///
   /// The root of the tree is a valid BIP32-ED25519 `master key`.
   Bip32Ed25519(Uint8List masterSeed) {
-    this.root = master(masterSeed);
+    root = master(masterSeed);
   }
 
   /// It creates a BIP32-ED25519 specific key tree from a hex string representation
@@ -37,7 +34,7 @@ class Bip32Ed25519 extends Bip32Ed25519KeyDerivation with Bip32KeyTree {
   ///
   /// The root of the tree is a valid BIP32-ED25519 `master key`.
   Bip32Ed25519.seed(String masterSeedHex) {
-    this.root = master(HexCoder.instance.decode(masterSeedHex));
+    root = master(HexCoder.instance.decode(masterSeedHex));
   }
 
   /// It creates a sub key tree from a, usually `Bech32`, decoded,
@@ -49,7 +46,7 @@ class Bip32Ed25519 extends Bip32Ed25519KeyDerivation with Bip32KeyTree {
   /// The root of the tree, usually, is **NOT** a `BIP32-ED25519` master key,
   /// but a valid `BIP-ED25519` compatible signing and verifying key.
   Bip32Ed25519.import(String encodedKey) {
-    this.root = doImport(encodedKey);
+    root = doImport(encodedKey);
   }
 
   /// It creates a sub key tree from an imported `BIP-ED25519` compatible
@@ -61,7 +58,7 @@ class Bip32Ed25519 extends Bip32Ed25519KeyDerivation with Bip32KeyTree {
   /// The root of the tree, usually, is **NOT** a `BIP32-ED25519` master key,
   /// but a valid `BIP-ED25519` compatible signing and verifying key.
   Bip32Ed25519.importFromKey(Bip32Key key) {
-    this.root = key;
+    root = key;
   }
 
   /// BIP32-ED25519 dependent tree depth.
@@ -72,11 +69,13 @@ class Bip32Ed25519 extends Bip32Ed25519KeyDerivation with Bip32KeyTree {
 
   /// The default implementation of the original BIP32-ED25519's master key
   /// generation.
+  @override
   Bip32Key master(Uint8List masterSecret) {
     final secretBytes = Hash.sha512(masterSecret);
 
-    if ((secretBytes[31] &= 0x20) != 0)
+    if ((secretBytes[31] &= 0x20) != 0) {
       throw InvalidBip32Ed25519MasterSecretException();
+    }
 
     final rootChainCode = Hash.sha256([0x01, ...masterSecret].toUint8List());
 
@@ -107,14 +106,15 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivation {
       Bip32Ed25519KeyDerivation._singleton();
 
   static Uint8List _ser32LE(int index) {
-    if (index < 0 || index > 0xffffffff)
+    if (index < 0 || index > 0xffffffff) {
       throw InvalidBip32Ed25519IndexException();
+    }
 
     return Uint8List(4)..buffer.asByteData().setInt32(0, index, Endian.little);
   }
 
   static void scalar_add(Uint8List out, int offset, Uint8List k, Uint8List k1) {
-    int r = 0;
+    var r = 0;
 
     for (var i = 0; i < 32; i++) {
       r = k[i] + k1[i] + r;
@@ -124,7 +124,7 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivation {
   }
 
   static void scalar_mul_8(Uint8List out, Uint8List k, int bytes) {
-    int r = 0;
+    var r = 0;
     for (var i = 0; i < bytes; i++) {
       out[i] = (k[i] << 3) + (r & 0x7);
       r = k[i] >> 5;
@@ -136,9 +136,9 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivation {
       int op1Off, Uint8List op2, int op2Off) {
     var carry = 0;
     for (var i = 0; i < 32; i++) {
-      int a = op1[i + op1Off];
-      int b = op2[i + op2Off];
-      int r = a + b + carry;
+      var a = op1[i + op1Off];
+      var b = op2[i + op2Off];
+      var r = a + b + carry;
       out[i + outOff] = r & 0xff;
       carry = (r >= 0x100) ? 1 : 0;
     }
@@ -151,8 +151,9 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivation {
     final suffix = _ser32LE(index); // Throws Exception on failure
 
     // If hardened the key must be a private key
-    if (hardened && (parentKey is Bip32PublicKey))
+    if (hardened && (parentKey is Bip32PublicKey)) {
       throw InvalidBip23Ed25519DerivationKeyError();
+    }
 
     final prefix = hardened ? prefixes[0] : prefixes[1];
 
@@ -166,8 +167,7 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivation {
 
   static Uint8List _deriveMessage(
       Uint8List out, Bip32Key parentKey, int prefix, Uint8List suffix) {
-    final messageBytes =
-        [prefix, ...parentKey.keyBytes, ...suffix].toUint8List();
+    final messageBytes = [prefix, ...parentKey.rawKey, ...suffix].toUint8List();
 
     TweetNaClExt.crypto_auth_hmacsha512(
         out, messageBytes, parentKey.chainCode.asTypedList);
@@ -187,6 +187,7 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivation {
   /// Public parent key to public child key
   ///
   /// I computes a child extended private key from the parent extended private key.
+  @override
   Bip32PrivateKey ckdPriv(Bip32PrivateKey parentKey, int index) =>
       _ckd(parentKey, index) as Bip32PrivateKey;
 
@@ -194,6 +195,7 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivation {
   ///
   /// It computes a child extended public key from the parent extended public key.
   /// It is only defined for non-hardened child keys.
+  @override
   Bip32PublicKey ckdPub(Bip32PublicKey parentKey, int index) =>
       _ckd(parentKey, index) as Bip32PublicKey;
 
@@ -202,6 +204,7 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivation {
   /// It computes the extended public key corresponding to an extended private
   /// key a.k.a the `neutered` version, as it removes the ability to sign transactions.
   ///
+  @override
   Bip32PublicKey neuterPriv(Bip32PrivateKey k) =>
       Bip32VerifyKey(k.publicKey.asTypedList);
 
@@ -230,8 +233,9 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivation {
       final depth = (parentKey as Bip32SigningKey).depth + 1;
 
       /// We simply throw Error as it simply an adversary action.
-      if (depth > Bip32Ed25519.maxDepth)
-        throw new MaxDepthExceededBip23Ed25519DerivationKeyError();
+      if (depth > Bip32Ed25519.maxDepth) {
+        throw MaxDepthExceededBip23Ed25519DerivationKeyError();
+      }
       final k = Uint8List(64);
 
       // k = kl + kr
@@ -248,7 +252,7 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivation {
   }
 }
 
-class Bip32VerifyKey extends VerifyKey with Bip32PublicKey {
+class Bip32VerifyKey extends VerifyKey with Suffix, Bip32PublicKey {
   Bip32VerifyKey(Uint8List publicBytes) : super(publicBytes, keyLength) {
     _chainCode = ChainCode(suffix);
   }

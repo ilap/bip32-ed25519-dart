@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.3.1
+
+Updated to be compatible with pinenacle v0.3.5
+
 ## v0.3.0
 
 API Breaking changes.

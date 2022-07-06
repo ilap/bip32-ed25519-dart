@@ -16,14 +16,14 @@ void main() {
 
     final dynamic keypairs = yoroi['keypairs'];
 
-    final dynamic ck = yoroi['chain_prv']! as String;
-    final dynamic cK = yoroi['chain_pub']! as String;
+    final ck = yoroi['chain_prv']! as String;
+    final cK = yoroi['chain_pub']! as String;
 
     final chainPrv = Bip32SigningKey.decode(ck, coder: xprvCoder);
     final chainPub = Bip32VerifyKey.decode(cK, coder: xpubCoder);
 
     var idx = 0;
-    keypairs.asMap().forEach((index, dynamic keypair) {
+    keypairs.asMap().forEach((int index, dynamic keypair) {
       var description = 'yoroi\'s m/1852\'/1815\'/0\'/0/$index';
 
       test(description, () {

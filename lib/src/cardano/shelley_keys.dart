@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:pinenacl/key_derivation.dart';
 
 import 'package:bip32_ed25519/api.dart';

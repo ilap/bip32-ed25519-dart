@@ -1,11 +1,12 @@
 import 'dart:async';
+
+import 'package:pinenacl/digests.dart';
+
 import 'package:bip32_ed25519/api.dart';
 import 'package:bip32_ed25519/bip32_ed25519.dart';
+
 import 'coin.dart';
 import 'scanner.dart';
-
-import 'package:pinenacl/ed25519.dart';
-import 'package:pinenacl/digests.dart';
 
 /// https://github.com/input-output-hk/cardano-addresses
 class Address {
@@ -20,7 +21,7 @@ class Address {
 
   // ignore: non_constant_identifier_names
   String get toBaseAddress {
-    final pk = chain.pathToKey(path).publicKey.keyBytes;
+    final pk = chain.pathToKey(path).publicKey;
     final a = Hash.blake2b(pk.asTypedList, digestSize: 28);
 
     const coder = Bech32Coder(hrp: 'addr_test');

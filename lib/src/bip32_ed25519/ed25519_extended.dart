@@ -1,6 +1,3 @@
-import 'dart:typed_data';
-import 'package:pinenacl/api.dart';
-
 import 'package:pinenacl/ed25519.dart';
 import 'package:pinenacl/digests.dart';
 import 'package:pinenacl/tweetnacl.dart';
@@ -52,7 +49,7 @@ class ExtendedSigningKey extends SigningKey {
   VerifyKey? _verifyKey;
 
   @override
-  VerifyKey get verifyKey => _verifyKey ??= _toPublic(this.asTypedList);
+  VerifyKey get verifyKey => _verifyKey ??= _toPublic(asTypedList);
 
   @override
   VerifyKey get publicKey => verifyKey;
@@ -85,7 +82,7 @@ class ExtendedSigningKey extends SigningKey {
   SignedMessage sign(List<int> message) {
     // signed message
     var sm = Uint8List(message.length + TweetNaCl.signatureLength);
-    var kb = (this.keyBytes + publicKey).toUint8List();
+    var kb = (prefix + publicKey).toUint8List();
     final result = TweetNaCl.crypto_sign(
         sm, -1, message.toUint8List(), 0, message.length, kb,
         extended: true);

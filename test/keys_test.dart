@@ -1,6 +1,5 @@
 import 'package:test/test.dart';
 
-import 'package:pinenacl/ed25519.dart';
 import 'package:bip32_ed25519/api.dart';
 
 void main() {

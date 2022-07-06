@@ -1,20 +1,21 @@
-import 'package:bip32_ed25519/api.dart';
+// ignore_for_file: constant_identifier_names
+
 import 'package:bip32_ed25519/cardano.dart';
-import 'package:pinenacl/digests.dart';
 
 ///
 /// Address format
 ///
 enum AddressType { Base, Pointer, Enterprise, Reward }
+
 enum CredentialType { Key, Script }
 
 /// We do not consider Byron's protocol magic
 enum NetworkId { testnet, mainnet }
 
 abstract class CredentialHash extends ByteList {
+  CredentialHash(List<int> bytes) : super(bytes, hashLength);
   int get kind;
   static const hashLength = 28;
-  CredentialHash(List<int> bytes) : super(bytes, hashLength);
 }
 
 class KeyHash extends CredentialHash {
@@ -32,12 +33,11 @@ class ScriptHash extends CredentialHash {
 }
 
 abstract class ShelleyAddress extends ByteList {
+  ShelleyAddress(this.networkId, List<int> bytes) : super(bytes);
   static const defaultPrefix = 'addr';
   static const defaultTail = '_test';
 
   final NetworkId networkId;
-
-  ShelleyAddress(this.networkId, List<int> bytes) : super(bytes);
 
   static String _computeHrp(NetworkId id, String prefix) {
     return id == NetworkId.testnet
@@ -48,7 +48,7 @@ abstract class ShelleyAddress extends ByteList {
   String toBech32({String? prefix}) {
     prefix ??= _computeHrp(networkId, defaultPrefix);
 
-    return this.encode(Bech32Coder(hrp: prefix));
+    return encode(Bech32Coder(hrp: prefix));
   }
 
   static ShelleyAddress fromBech32(String address) {
@@ -130,10 +130,8 @@ abstract class ShelleyAddress extends ByteList {
             _getCredentialType(header, bytes.skip(1).toList(), bit: 4));
 
       default:
-        throw Exception('Unsupported Cardano Address, type: ${header}');
+        throw Exception('Unsupported Cardano Address, type: $header');
     }
-
-    throw Error();
   }
 
   /// If the nth bit is 0 that means it's a key hash, otherwise it's script hash.
@@ -277,15 +275,15 @@ class RewardAddress extends ShelleyAddress {
 }
 
 void main() {
-  const seed =
-      '475083b81730de275969b1f18db34b7fb4ef79c66aa8efdd7742f1bcfe204097';
-  const addressPath = "m/1852'/1815'/0'/0/0";
-  const rewardAddressPath = "m/1852'/1815'/0'/2/0";
+  //const seed =
+  //    '475083b81730de275969b1f18db34b7fb4ef79c66aa8efdd7742f1bcfe204097';
+  //const addressPath = "m/1852'/1815'/0'/0/0";
+  //const rewardAddressPath = "m/1852'/1815'/0'/2/0";
 
-  final icarusKeyTree = CardanoIcarusKey.seed(seed);
+  //final icarusKeyTree = CardanoIcarusKey.seed(seed);
 
-  final addressKey = icarusKeyTree.pathToKey(addressPath);
-  final rewardKey = icarusKeyTree.pathToKey(rewardAddressPath);
+  //final addressKey = icarusKeyTree.pathToKey(addressPath);
+  //final rewardKey = icarusKeyTree.pathToKey(rewardAddressPath);
 
   var address = ShelleyAddress.fromBech32(
       'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp');
