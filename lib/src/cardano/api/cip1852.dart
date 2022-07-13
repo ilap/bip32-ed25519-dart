@@ -13,5 +13,5 @@ abstract class Cip1852KeyTree extends Bip44KeyTree {
   set role(int newRole) => change;
 
   @override
-  final int purpose = Bip32KeyTree.hardenedIndex | 0x1852;
+  int get purpose => Bip32KeyTree.hardenedIndex | 0x1852;
 }

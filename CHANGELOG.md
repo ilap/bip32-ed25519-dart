@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.5.0
+API break changes due to the pinenacl v0.5.0 API breaks
+
 ## v0.4.0
 
 Bumped to v0.4.0 due to the API breaks presented in pinenacl-dart v0.3.5 (bumped to v0.4.0)

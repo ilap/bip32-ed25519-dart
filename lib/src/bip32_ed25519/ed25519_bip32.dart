@@ -1,4 +1,4 @@
-import 'package:pinenacl/digests.dart';
+// ignore_for_file: non_constant_identifier_names, no_leading_underscores_for_local_identifiers
 import 'package:pinenacl/tweetnacl.dart';
 
 import 'package:bip32_ed25519/api.dart';
@@ -24,8 +24,8 @@ class Bip32Ed25519 extends Bip32Ed25519KeyDerivation with Bip32KeyTree {
   /// sources. E.g. From some `bip-0039` tool, `CPRNG` etc.
   ///
   /// The root of the tree is a valid BIP32-ED25519 `master key`.
-  Bip32Ed25519(Uint8List masterSeed) {
-    root = master(masterSeed);
+  Bip32Ed25519(Uint8List seed) {
+    root = master(seed);
   }
 
   /// It creates a BIP32-ED25519 specific key tree from a hex string representation
@@ -34,7 +34,7 @@ class Bip32Ed25519 extends Bip32Ed25519KeyDerivation with Bip32KeyTree {
   ///
   /// The root of the tree is a valid BIP32-ED25519 `master key`.
   Bip32Ed25519.seed(String masterSeedHex) {
-    root = master(HexCoder.instance.decode(masterSeedHex));
+    root = master(Base16Encoder.instance.decode(masterSeedHex));
   }
 
   /// It creates a sub key tree from a, usually `Bech32`, decoded,
@@ -70,19 +70,19 @@ class Bip32Ed25519 extends Bip32Ed25519KeyDerivation with Bip32KeyTree {
   /// The default implementation of the original BIP32-ED25519's master key
   /// generation.
   @override
-  Bip32Key master(Uint8List masterSecret) {
-    final secretBytes = Hash.sha512(masterSecret);
+  Bip32Key master(Uint8List seed) {
+    final secretBytes = Hash.sha512(seed);
 
     if ((secretBytes[31] &= 0x20) != 0) {
       throw InvalidBip32Ed25519MasterSecretException();
     }
 
-    final rootChainCode = Hash.sha256([0x01, ...masterSecret].toUint8List());
+    final rootChainCode = Hash.sha256([0x01, ...seed].toUint8List());
 
     final rootKey = Bip32SigningKey.normalizeBytes(
         [...secretBytes, ...rootChainCode].toUint8List());
 
-    PineNaClUtils.listZero(masterSecret);
+    PineNaClUtils.listZero(seed);
     PineNaClUtils.listZero(rootChainCode);
 
     return rootKey;
@@ -253,12 +253,13 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivation {
 }
 
 class Bip32VerifyKey extends VerifyKey with Suffix, Bip32PublicKey {
-  Bip32VerifyKey(Uint8List publicBytes) : super(publicBytes, keyLength) {
+  Bip32VerifyKey(Uint8List publicBytes)
+      : super(publicBytes, keyLength: keyLength) {
     _chainCode = ChainCode(suffix);
   }
 
   Bip32VerifyKey.decode(String data, {Encoder coder = decoder})
-      : super.decode(data, coder: coder) {
+      : super.decode(data, coder: coder, keyLength: keyLength) {
     _chainCode = ChainCode(suffix);
   }
 
@@ -267,7 +268,7 @@ class Bip32VerifyKey extends VerifyKey with Suffix, Bip32PublicKey {
       : this([...pubBytes, ...chainCodeBytes].toUint8List());
 
   @override
-  final int prefixLength = keyLength - ChainCode.chainCodeLength;
+  int get prefixLength => keyLength - ChainCode.chainCodeLength;
 
   static const keyLength = 64;
 
@@ -288,7 +289,7 @@ class Bip32VerifyKey extends VerifyKey with Suffix, Bip32PublicKey {
         as Bip32VerifyKey;
   }
 
-  static const decoder = Bech32Coder(hrp: 'root_xpk');
+  static const decoder = Bech32Encoder(hrp: 'root_xpk');
 
   @override
   Encoder get encoder => decoder;
@@ -346,7 +347,7 @@ class Bip32SigningKey extends ExtendedSigningKey with Bip32PrivateKey {
   }
 
   @override
-  final int prefixLength = keyLength - ChainCode.chainCodeLength;
+  int get prefixLength => keyLength - ChainCode.chainCodeLength;
 
   static const keyLength = 96;
 
@@ -377,7 +378,7 @@ class Bip32SigningKey extends ExtendedSigningKey with Bip32PrivateKey {
         as Bip32SigningKey;
   }
 
-  static const decoder = Bech32Coder(hrp: 'root_xsk');
+  static const decoder = Bech32Encoder(hrp: 'root_xsk');
 
   @override
   Encoder get encoder => decoder;

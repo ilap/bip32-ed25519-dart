@@ -4,6 +4,8 @@ import 'package:pinenacl/api.dart';
 
 export 'dart:typed_data';
 export 'package:pinenacl/ed25519.dart';
+export 'package:pinenacl/digests.dart';
+
 export 'package:bip32_ed25519/bip32_ed25519.dart';
 
 /// BIPs

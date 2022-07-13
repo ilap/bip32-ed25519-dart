@@ -6,5 +6,5 @@ part of bip32_ed25519.api;
 ///
 abstract class Bip43KeyTree implements Bip32KeyTree {
   /// Purpose, defaults to Bip43 i.e. 43'
-  final int purpose = Bip32KeyTree.hardenedIndex | 43;
+  int get purpose => Bip32KeyTree.hardenedIndex | 43;
 }

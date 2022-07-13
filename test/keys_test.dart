@@ -1,10 +1,12 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers, non_constant_identifier_names
+
 import 'package:test/test.dart';
 
 import 'package:bip32_ed25519/api.dart';
 
 void main() {
-  const xprvCoder = Bech32Coder(hrp: 'xprv');
-  const xpubCoder = Bech32Coder(hrp: 'xpub');
+  const xprvCoder = Bech32Encoder(hrp: 'xprv');
+  const xpubCoder = Bech32Encoder(hrp: 'xpub');
 
   //const mnemonic =
   //    "art forum devote street sure rather head chuckle guard poverty release quote oak craft enemy";
@@ -101,7 +103,8 @@ void main() {
       final xprv = Bip32SigningKey.decode(xPrv, coder: xprvCoder);
       final chainCode = xprv.chainCode;
 
-      final pubBytes = HexCoder.instance.decode(publicBytesHex).sublist(0, 32);
+      final pubBytes =
+          Base16Encoder.instance.decode(publicBytesHex).sublist(0, 32);
       final xpub = Bip32VerifyKey.fromKeyBytes(pubBytes, chainCode.asTypedList);
 
       assert(xpub == xprv.verifyKey);

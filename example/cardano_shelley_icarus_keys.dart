@@ -13,14 +13,14 @@ void main() {
 
   final icarusKeyTree = CardanoIcarusKey.seed(seed);
 
-  print(icarusKeyTree.root.encode(Bech32Coder(hrp: 'xprv')));
+  print(icarusKeyTree.root.encode(Bech32Encoder(hrp: 'xprv')));
   print('');
   print('Generating account key pair from path $accountPath');
 
   final accountKey = icarusKeyTree.pathToKey(accountPath);
 
-  print(accountKey.encode(Bech32Coder(hrp: 'xprv')));
-  print(accountKey.publicKey.encode(Bech32Coder(hrp: 'xpub')));
+  print(accountKey.encode(Bech32Encoder(hrp: 'xprv')));
+  print(accountKey.publicKey.encode(Bech32Encoder(hrp: 'xpub')));
   print('');
 
   print('Importing account key to a KeyTree: $accountPath -> m/');
@@ -34,25 +34,25 @@ void main() {
 
   final neuteredKeyTree = CardanoIcarusKey.import(neutered.encode());
 
-  print(neuteredKeyTree.root.encode(Bech32Coder(hrp: 'xpub')));
+  print(neuteredKeyTree.root.encode(Bech32Encoder(hrp: 'xpub')));
   print('');
 
   print('These three public address keys must be the same...\n');
   print('Generating address public key from $addressPath');
   final addressKey = icarusKeyTree.pathToKey(addressPath);
-  print(addressKey.publicKey.encode(Bech32Coder(hrp: 'xpub')));
+  print(addressKey.publicKey.encode(Bech32Encoder(hrp: 'xpub')));
 
   print('');
 
   print('Generating address public key from $neuteredPath');
   final neuteredAddress = neuteredKeyTree.pathToKey(neuteredPath);
-  print(neuteredAddress.encode(Bech32Coder(hrp: 'xpub')));
+  print(neuteredAddress.encode(Bech32Encoder(hrp: 'xpub')));
 
   print('');
 
   print('Generating address public key from $nonNeuteredPath');
   final addressKey1 = importedKeyTree.pathToKey(nonNeuteredPath);
-  print(addressKey1.publicKey.encode(Bech32Coder(hrp: 'xpub')));
+  print(addressKey1.publicKey.encode(Bech32Encoder(hrp: 'xpub')));
 
   print('');
 

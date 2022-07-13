@@ -1,7 +1,8 @@
 part of bip32_ed25519.api;
 
 class ChainCode extends ByteList {
-  ChainCode(ByteList bytes) : super(bytes, chainCodeLength);
+  ChainCode(ByteList bytes)
+      : super.withConstraint(bytes, constraintLength: chainCodeLength);
   static const int chainCodeLength = 32;
 }
 
@@ -13,7 +14,7 @@ mixin Bip32Key on AsymmetricKey {
 }
 
 mixin Bip32PrivateKey on AsymmetricPrivateKey implements Bip32Key {
-  final int depth = 0;
+  int get depth => 0;
 }
 
 mixin Bip32PublicKey on AsymmetricPublicKey implements Bip32Key {}

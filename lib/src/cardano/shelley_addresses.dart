@@ -13,7 +13,8 @@ enum CredentialType { Key, Script }
 enum NetworkId { testnet, mainnet }
 
 abstract class CredentialHash extends ByteList {
-  CredentialHash(List<int> bytes) : super(bytes, hashLength);
+  CredentialHash(List<int> bytes)
+      : super.withConstraint(bytes, constraintLength: hashLength);
   int get kind;
   static const hashLength = 28;
 }
@@ -34,6 +35,7 @@ class ScriptHash extends CredentialHash {
 
 abstract class ShelleyAddress extends ByteList {
   ShelleyAddress(this.networkId, List<int> bytes) : super(bytes);
+
   static const defaultPrefix = 'addr';
   static const defaultTail = '_test';
 
@@ -48,15 +50,13 @@ abstract class ShelleyAddress extends ByteList {
   String toBech32({String? prefix}) {
     prefix ??= _computeHrp(networkId, defaultPrefix);
 
-    return encode(Bech32Coder(hrp: prefix));
+    return encode(Bech32Encoder(hrp: prefix));
   }
 
   static ShelleyAddress fromBech32(String address) {
-    final decoded = bech32.decode(address, 256);
-    final hrp = decoded.hrp;
+    final decodedBytes = Bech32Encoder.decodeNoHrpCheck(address, 256);
 
-    final bytes = Bech32Coder(hrp: hrp).decode(address);
-    return fromBytes(bytes);
+    return fromBytes(decodedBytes);
   }
 
   static ShelleyAddress fromBytes(List<int> bytes) {
@@ -119,7 +119,7 @@ abstract class ShelleyAddress extends ByteList {
         return EnterpriseAddress(networkId,
             _getCredentialType(header, bytes.skip(1).toList(), bit: 4));
 
-      // Stake (chmeric) Address
+      // Stake (chimeric) Address
       case 14:
       case 15:
         if (bytes.length != 1 + CredentialHash.hashLength) {

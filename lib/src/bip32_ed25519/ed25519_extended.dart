@@ -42,7 +42,7 @@ class ExtendedSigningKey extends SigningKey {
   static const seedSize = TweetNaCl.seedSize;
 
   @override
-  final int prefixLength = keyLength;
+  int get prefixLength => keyLength;
 
   static const keyLength = 64;
 
@@ -93,7 +93,7 @@ class ExtendedSigningKey extends SigningKey {
     return SignedMessage.fromList(signedMessage: sm);
   }
 
-  static const decoder = Bech32Coder(hrp: 'ed25519e_sk');
+  static const decoder = Bech32Encoder(hrp: 'ed25519e_sk');
 
   @override
   Encoder get encoder => decoder;

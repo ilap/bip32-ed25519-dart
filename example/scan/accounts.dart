@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:pinenacl/digests.dart';
-
 import 'package:bip32_ed25519/api.dart';
 import 'package:bip32_ed25519/bip32_ed25519.dart';
 
@@ -24,7 +22,7 @@ class Address {
     final pk = chain.pathToKey(path).publicKey;
     final a = Hash.blake2b(pk.asTypedList, digestSize: 28);
 
-    const coder = Bech32Coder(hrp: 'addr_test');
+    const coder = Bech32Encoder(hrp: 'addr_test');
     final addr = ByteList([0x60] + a).encode(coder);
 
     print('Address: $addr');

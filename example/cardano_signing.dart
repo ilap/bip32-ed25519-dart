@@ -1,7 +1,7 @@
 import 'package:bip32_ed25519/api.dart';
 
 void main() {
-  const hex = HexCoder.instance;
+  const hex = Base16Encoder.instance;
   print('\n### BIP32 Digital Signatures ###\n');
 
   /// Signer’s perspective (SigningKey)

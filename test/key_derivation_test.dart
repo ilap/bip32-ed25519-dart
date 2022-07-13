@@ -5,8 +5,8 @@ import 'package:test/test.dart';
 import 'package:bip32_ed25519/api.dart';
 
 void main() {
-  const xprvCoder = Bech32Coder(hrp: 'xprv');
-  const xpubCoder = Bech32Coder(hrp: 'xpub');
+  const xprvCoder = Bech32Encoder(hrp: 'xprv');
+  const xpubCoder = Bech32Encoder(hrp: 'xpub');
   group('Key derivation tests', () {
     final dir = Directory.current;
     final file = File('${dir.path}/test/data/yoroi_keys.json');
