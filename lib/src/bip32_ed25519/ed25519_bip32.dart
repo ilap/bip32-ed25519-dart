@@ -73,7 +73,7 @@ class Bip32Ed25519 extends Bip32Ed25519KeyDerivation with Bip32KeyTree {
   Bip32Key master(Uint8List seed) {
     final secretBytes = Hash.sha512(seed);
 
-    if ((secretBytes[31] &= 0x20) != 0) {
+    if ((secretBytes[31] & 0x20) != 0) {
       throw InvalidBip32Ed25519MasterSecretException();
     }
 
