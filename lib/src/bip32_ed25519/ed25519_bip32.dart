@@ -253,8 +253,7 @@ class Bip32Ed25519KeyDerivation implements Bip32ChildKeyDerivation {
 }
 
 class Bip32VerifyKey extends VerifyKey with Suffix, Bip32PublicKey {
-  Bip32VerifyKey(super.publicBytes)
-      : super(keyLength: keyLength) {
+  Bip32VerifyKey(super.publicBytes) : super(keyLength: keyLength) {
     _chainCode = ChainCode(suffix);
   }
 

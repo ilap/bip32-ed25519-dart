@@ -31,7 +31,6 @@ abstract class Bip32ChildKeyDerivation {
 
   /// Public parent key to private child key
   /// It is impossible
-
 }
 
 /// Key Tree
