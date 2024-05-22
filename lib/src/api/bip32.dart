@@ -1,8 +1,8 @@
-part of bip32_ed25519.api;
+part of '../../api.dart';
 
 class ChainCode extends ByteList {
-  ChainCode(ByteList bytes)
-      : super.withConstraint(bytes, constraintLength: chainCodeLength);
+  ChainCode(ByteList super.bytes)
+      : super.withConstraint(constraintLength: chainCodeLength);
   static const int chainCodeLength = 32;
 }
 
@@ -45,7 +45,7 @@ abstract class Bip32ChildKeyDerivation {
 /// reconstruction of all descendant non-hardened public keys
 /// Source: [BIP-0032](https://en.bitcoin.it/wiki/BIP_0032#The_key_tree)
 ///
-abstract class Bip32KeyTree implements Bip32ChildKeyDerivation {
+mixin Bip32KeyTree implements Bip32ChildKeyDerivation {
   late final Bip32Key root;
 
   static const int maxIndex = 0xFFFFFFFF;

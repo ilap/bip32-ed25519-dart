@@ -1,4 +1,4 @@
-part of bip32_ed25519.api;
+part of '../../../api.dart';
 
 ///
 /// Using 1852' as the purpose field, we defined the following derivation path

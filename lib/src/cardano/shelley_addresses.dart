@@ -13,21 +13,21 @@ enum CredentialType { Key, Script }
 enum NetworkId { testnet, mainnet }
 
 abstract class CredentialHash extends ByteList {
-  CredentialHash(List<int> bytes)
-      : super.withConstraint(bytes, constraintLength: hashLength);
+  CredentialHash(List<int> super.bytes)
+      : super.withConstraint(constraintLength: hashLength);
   int get kind;
   static const hashLength = 28;
 }
 
 class KeyHash extends CredentialHash {
-  KeyHash(List<int> bytes) : super(bytes);
+  KeyHash(super.bytes);
 
   @override
   int get kind => CredentialType.Key.index;
 }
 
 class ScriptHash extends CredentialHash {
-  ScriptHash(List<int> bytes) : super(bytes);
+  ScriptHash(super.bytes);
 
   @override
   int get kind => CredentialType.Key.index;
