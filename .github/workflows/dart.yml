@@ -23,12 +23,8 @@ jobs:
         run: echo "Dart SDK installed in $DART_HOME"
       - run: dart pub get
       - run: dart format --output=none --set-exit-if-changed .
-      - run: dart run example/main.dart
-      - run: dart run example/box.dart
-      - run: dart run example/sealedbox.dart
-      - run: dart run example/secretbox.dart
-      - run: dart run example/secure.dart
-      - run: dart run example/signature.dart
+      - run: dart run example/cardano_shelley_icarus_keys.dart
+      - run: dart run example/cardano_signing.dart
       - run: dart analyze
       - run: dart test
 
@@ -51,11 +47,7 @@ jobs:
         run: echo "Dart SDK installed in $DART_HOME"
       - run: dart pub get
       - run: dart format --output=none --set-exit-if-changed .
-      - run: dart run example/main.dart
-      - run: dart run example/box.dart
-      - run: dart run example/sealedbox.dart
-      - run: dart run example/secretbox.dart
-      - run: dart run example/secure.dart
-      - run: dart run example/signature.dart
+      - run: dart run example/cardano_shelley_icarus_keys.dart
+      - run: dart run example/cardano_signing.dart
       - run: dart analyze
       - run: dart test
