@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.6.0
+- Updated for the 3.x SDK version.
+- Updated CI
+
 ## v0.5.0
 API break changes due to the pinenacl v0.5.0 API breaks
 
