@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.6.1
+- Updated example using bip39 and correct account paths
+
 ## v0.6.0
 - Updated for the 3.x SDK version.
 - Updated CI

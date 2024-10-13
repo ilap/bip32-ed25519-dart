@@ -5,30 +5,7 @@ import 'package:bip32_ed25519/bip32_ed25519.dart';
 
 import 'coin.dart';
 import 'scanner.dart';
-
-/// https://github.com/input-output-hk/cardano-addresses
-class Address {
-  Address(this.account, this.index);
-
-  final Account account;
-  final int index;
-
-  String get path =>
-      '${account.path}/${Bip32KeyTree.indexToPathNotation(index)}';
-  Bip32Ed25519 get chain => account.chain;
-
-  // ignore: non_constant_identifier_names
-  String get toBaseAddress {
-    final pk = chain.pathToKey(path).publicKey;
-    final a = Hash.blake2b(pk.asTypedList, digestSize: 28);
-
-    const coder = Bech32Encoder(hrp: 'addr_test');
-    final addr = ByteList([0x60] + a).encode(coder);
-
-    print('Address: $addr');
-    return addr;
-  }
-}
+import 'address.dart';
 
 class Account {
   Account(this.coin, this.index, this.change);
@@ -45,7 +22,7 @@ class Account {
   }
 
   Future<Address> nextUnusedAddress() async {
-    var used = await usedAddresses();
+    final used = await usedAddresses();
 
     if (used.isEmpty) {
       return Address(this, 0);
@@ -55,7 +32,7 @@ class Account {
   }
 
   Future<List<Address>> usedAddresses() async {
-    var usedAddresses = <Address>[];
+    final usedAddresses = <Address>[];
 
     var addressIndex = 0;
     var nextAddress = Address(this, addressIndex);
@@ -71,5 +48,11 @@ class Account {
 
   Account next() {
     return Account(coin, index + 1, 0);
+  }
+
+  @override
+  String toString() {
+    return '''Account(${coin.path}/${Bip32KeyTree.indexToPathNotation(index)}'''
+        '''/${Bip32KeyTree.indexToPathNotation(change)})''';
   }
 }

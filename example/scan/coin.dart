@@ -1,8 +1,9 @@
 import 'dart:async';
-import 'accounts.dart';
 
 import 'package:bip32_ed25519/api.dart';
 import 'package:bip32_ed25519/bip32_ed25519.dart';
+
+import 'account.dart';
 
 class Coin {
   Coin(this.chain, this.index);
@@ -10,12 +11,12 @@ class Coin {
   final Bip32Ed25519 chain;
   final int index;
 
-  String get path => "m/1852'/1815'";
+  String get path => "m/1852'/${Bip32KeyTree.indexToPathNotation(index)}";
 
   Future<List<Account>> accounts() async {
-    var accounts = <Account>[];
+    final accounts = <Account>[];
 
-    var next = Account(this, 0x80000000, 0);
+    var next = Account(this, Bip32KeyTree.hardenedIndex, 0);
     while (await next.isUsed) {
       accounts.add(next);
       next = next.next();
