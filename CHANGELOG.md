@@ -2,6 +2,7 @@
 
 ## v0.6.1
 - Updated example using bip39 and correct account paths
+- Updated lint to 5.0.0
 
 ## v0.6.0
 - Updated for the 3.x SDK version.

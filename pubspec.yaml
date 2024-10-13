@@ -13,5 +13,5 @@ dev_dependencies:
   test: ^1.25.8
   benchmark_harness: ^2.2.2
   http: ^1.2.2
-  lints: ^4.0.0
+  lints: ^5.0.0
   bip39: ^1.0.6
