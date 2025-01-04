@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.6.2
+- **New Feature**: Introduced a neutered KeyTree constructor: CardanoIcarusKey.neuteredFromSeed.
+- **Enhancement**: Replaced the `BlockFrost` implementation with `KoiosScanner` for improved scanning functionality.
+- **Maintenance**: Updated project dependencies to the latest versions.
+- **Bug Fix**: Corrected coin type handling in compliance with CIP-1852 and CIP-1954 standards.
 ## v0.6.1
 - Updated example using bip39 and correct account paths
 - Updated lint to 5.0.0

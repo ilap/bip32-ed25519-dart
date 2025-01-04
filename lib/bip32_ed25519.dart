@@ -1,4 +1,4 @@
-library bip32_ed25519;
+library;
 
 export 'package:bip32_ed25519/api.dart';
 export 'package:bip32_ed25519/src/bip32_ed25519/ed25519_extended.dart';

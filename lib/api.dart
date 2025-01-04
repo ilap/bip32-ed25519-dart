@@ -1,4 +1,4 @@
-library bip32_ed25519.api;
+library;
 
 import 'package:pinenacl/api.dart';
 

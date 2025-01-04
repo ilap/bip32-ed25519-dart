@@ -37,6 +37,15 @@ class Bip32Ed25519 extends Bip32Ed25519KeyDerivation with Bip32KeyTree {
     root = master(Base16Encoder.instance.decode(masterSeedHex));
   }
 
+  /// It creates a neutered BIP32-ED25519 specific key tree from a hex string representation
+  /// of the master seed, which is a hex string representation of an `n-bit` length entropy,
+  /// that can come from different sources. E.g. From some `bip-0039` tool, `CPRNG` etc.
+  ///
+  /// The root of the tree is a valid BIP32-ED25519 verify key (Bip32VerifyKey).
+  Bip32Ed25519.neuteredFromSeed(String masterSeedHex) {
+    root = master(Base16Encoder.instance.decode(masterSeedHex)).neutered;
+  }
+
   /// It creates a sub key tree from a, usually `Bech32`, decoded,
   /// `Bip32-Ed25519` compatible private or public key.
   ///

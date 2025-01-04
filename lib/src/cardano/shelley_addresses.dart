@@ -169,8 +169,6 @@ abstract class ShelleyAddress extends ByteList {
         final header =
             0xe0 | (networkId.index & 0x0f) | (paymentBytes.kind << 4);
         return [header] + paymentBytes;
-      default:
-        throw Exception('Unsupported address header');
     }
   }
 }

@@ -6,6 +6,7 @@ import 'package:bip32_ed25519/bip32_ed25519.dart';
 class CardanoIcarusKey extends Bip32Ed25519 {
   CardanoIcarusKey(super.masterSecret);
   CardanoIcarusKey.seed(super.seed) : super.seed();
+  CardanoIcarusKey.neuteredFromSeed(super.seed) : super.neuteredFromSeed();
   CardanoIcarusKey.import(super.key) : super.import();
 
   @override
